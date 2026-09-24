@@ -1,0 +1,41 @@
+{
+  "apiVersion": "coroof.io/provider/v0.1",
+  "kind": "Provider",
+  "metadata": {
+    "id": "demo-crm",
+    "displayName": "Demo CRM",
+    "version": "0.1.0"
+  },
+  "spec": {
+    "protocol": {
+      "versions": [
+        "0.1"
+      ]
+    },
+    "type": "APPLICATION",
+    "authority": {
+      "domains": [
+        "sales.Contract"
+      ]
+    },
+    "discovery": {
+      "resources": {
+        "href": "/coroof/resources"
+      },
+      "capabilities": {
+        "href": "/coroof/capabilities"
+      },
+      "schemas": {
+        "href": "/coroof/schemas"
+      }
+    },
+    "health": {
+      "href": "/coroof/health"
+    },
+    "authentication": {
+      "schemes": [
+        "oauth2"
+      ]
+    }
+  }
+}

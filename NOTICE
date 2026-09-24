@@ -1,0 +1,6 @@
+coRoof
+Copyright 2026 coRoof contributors
+
+Except for spec/ and examples/, this project is licensed under AGPL-3.0-only.
+The shared protocol documents and examples in spec/ and examples/ are
+licensed under the Apache License, Version 2.0 (see their LICENSE files).

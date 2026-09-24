@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coroof.dev/spec/v0.1/provider.schema.json",
+  "title": "ProviderManifest",
+  "type": "object",
+  "properties": {
+    "apiVersion": {
+      "const": "coroof.io/provider/v0.1"
+    },
+    "kind": {
+      "const": "Provider"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "displayName",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "protocol": {
+          "type": "object",
+          "properties": {
+            "versions": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": [
+            "versions"
+          ],
+          "additionalProperties": false
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "APPLICATION",
+            "DATA",
+            "AGENT",
+            "DEVICE",
+            "COMPOSITE"
+          ]
+        },
+        "authority": {
+          "type": "object",
+          "properties": {
+            "domains": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": [
+            "domains"
+          ],
+          "additionalProperties": false
+        },
+        "discovery": {
+          "type": "object",
+          "properties": {
+            "resources": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^(https://[^\\s]+|/[^\\s]*)$"
+                }
+              },
+              "required": [
+                "href"
+              ],
+              "additionalProperties": false
+            },
+            "capabilities": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^(https://[^\\s]+|/[^\\s]*)$"
+                }
+              },
+              "required": [
+                "href"
+              ],
+              "additionalProperties": false
+            },
+            "schemas": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^(https://[^\\s]+|/[^\\s]*)$"
+                }
+              },
+              "required": [
+                "href"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "resources",
+            "capabilities",
+            "schemas"
+          ],
+          "additionalProperties": false
+        },
+        "health": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(https://[^\\s]+|/[^\\s]*)$"
+            }
+          },
+          "required": [
+            "href"
+          ],
+          "additionalProperties": false
+        },
+        "authentication": {
+          "type": "object",
+          "properties": {
+            "schemes": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": [
+            "schemes"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "protocol",
+        "type",
+        "authority",
+        "discovery",
+        "health",
+        "authentication"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "apiVersion",
+    "kind",
+    "metadata",
+    "spec"
+  ],
+  "additionalProperties": false
+}

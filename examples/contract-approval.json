@@ -1,0 +1,79 @@
+{
+  "apiVersion": "coroof.io/v0.1",
+  "kind": "WorkExperienceContract",
+  "metadata": {
+    "id": "wec:demo-contract-001",
+    "tenant": "demo",
+    "revision": 1
+  },
+  "spec": {
+    "actor": {
+      "ref": "actor:demo-reviewer"
+    },
+    "work": {
+      "id": "work:demo-contract-001",
+      "title": "审批示例公司的续约合同",
+      "type": "DECISION"
+    },
+    "focus": {
+      "ref": "contract:demo-001"
+    },
+    "facts": [
+      {
+        "id": "amount",
+        "label": "合同金额（CNY）",
+        "value": 3800000,
+        "importance": "HIGH"
+      },
+      {
+        "id": "discount",
+        "label": "折扣比例",
+        "value": 0.22,
+        "importance": "CRITICAL"
+      },
+      {
+        "id": "margin",
+        "label": "利润率",
+        "value": 0.14,
+        "importance": "HIGH"
+      }
+    ],
+    "attention": [
+      {
+        "id": "discount-risk",
+        "severity": "HIGH",
+        "reason": "折扣超过示例阈值，需要人工复核。"
+      }
+    ],
+    "evidence": [
+      {
+        "ref": "evidence:demo-margin",
+        "label": "示例利润测算"
+      }
+    ],
+    "actions": [
+      {
+        "capability": "sales.contract.approve",
+        "label": "批准",
+        "availability": "AVAILABLE",
+        "risk": "HIGH",
+        "requiresConfirmation": true
+      },
+      {
+        "capability": "sales.contract.request_revision",
+        "label": "要求修改",
+        "availability": "AVAILABLE",
+        "risk": "LOW",
+        "requiresConfirmation": false
+      },
+      {
+        "capability": "sales.contract.terminate",
+        "label": "终止合同",
+        "availability": "UNAVAILABLE",
+        "risk": "CRITICAL",
+        "requiresConfirmation": true,
+        "reason": "当前合同状态不允许终止。"
+      }
+    ]
+  }
+}

@@ -1,0 +1,254 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coroof.dev/spec/v0.1/work-experience.schema.json",
+  "title": "WorkExperienceContract",
+  "type": "object",
+  "properties": {
+    "apiVersion": {
+      "const": "coroof.io/v0.1"
+    },
+    "kind": {
+      "const": "WorkExperienceContract"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tenant": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "id",
+        "tenant",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "actor": {
+          "type": "object",
+          "properties": {
+            "ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "ref"
+          ],
+          "additionalProperties": false
+        },
+        "work": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "ACTION",
+                "DECISION",
+                "INVESTIGATION",
+                "REVIEW",
+                "APPROVAL",
+                "COMMUNICATION",
+                "WAIT"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        "focus": {
+          "type": "object",
+          "properties": {
+            "ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "ref"
+          ],
+          "additionalProperties": false
+        },
+        "facts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "value": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean",
+                  "null"
+                ]
+              },
+              "importance": {
+                "type": "string",
+                "enum": [
+                  "LOW",
+                  "MEDIUM",
+                  "HIGH",
+                  "CRITICAL"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "value",
+              "importance"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "attention": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "severity": {
+                "type": "string",
+                "enum": [
+                  "LOW",
+                  "MEDIUM",
+                  "HIGH",
+                  "CRITICAL"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "severity",
+              "reason"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "ref",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "capability": {
+                "type": "string",
+                "minLength": 1
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "availability": {
+                "type": "string",
+                "enum": [
+                  "AVAILABLE",
+                  "UNAVAILABLE"
+                ]
+              },
+              "risk": {
+                "type": "string",
+                "enum": [
+                  "LOW",
+                  "MEDIUM",
+                  "HIGH",
+                  "CRITICAL"
+                ]
+              },
+              "requiresConfirmation": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "capability",
+              "label",
+              "availability",
+              "risk",
+              "requiresConfirmation"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "actor",
+        "work",
+        "focus",
+        "facts",
+        "attention",
+        "evidence",
+        "actions"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "apiVersion",
+    "kind",
+    "metadata",
+    "spec"
+  ],
+  "additionalProperties": false
+}
