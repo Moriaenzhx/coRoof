@@ -1,4 +1,28 @@
-# coRoof Architecture v0.1
+# coRoof V1 Architecture
+
+当前实施边界：Phase 0 + Slice 01（2026-11-03）。模块化单体；Next.js 与 FastAPI 同源代理，API 和 Worker 共享 Python 领域代码，PostgreSQL 保存业务事实，Redis 只负责队列。原有 Go 模块单独保留，暂不参与此业务闭环。
+
+```text
+Browser (Owner / Manager / Member)
+  -> Next.js /api proxy
+  -> FastAPI identity + membership scope + typed command
+  -> PostgreSQL transaction: WorkItem projection + WorkEvent + audit
+
+Raw text -> UpdateProvider (RulesProvider)
+  -> validated UpdateDraft + AnalysisRun
+  -> explicit author confirmation + version check
+  -> same transactional work/event path
+
+Celery + Redis -> shared Python modules (currently read-only ping only)
+```
+
+API 层不依赖组件，DTO 由 OpenAPI 生成。组织和角色在服务器读取；数据表使用租户复合外键。任何 AI/连接器都只能在相同事实与授权边界接入。详情见 [领域模型](domain-model.md)、[API](api-contract.md)、[ADR](adr/0001-stack.md) 与 [后续扩展](extensions.md)。
+
+空库只通过 Alembic 迁移建结构，不自动填入虚构数据。首次登录后由用户建立企业。默认 mock 身份与规则草稿只用于本地开发，production 模式失败关闭。Compose 以独立 migrate 进程先迁移，再启动 API/Worker。
+
+## 历史：Go Runtime Architecture v0.1
+
+以下保留原架构草案作为早期协议背景，不是 V1 Slice 01 的实现描述。
 
 状态：初始化设计草案。本文整理产品讨论中的最终边界；聊天中的示例字段和未来设想不自动成为已实现功能。
 

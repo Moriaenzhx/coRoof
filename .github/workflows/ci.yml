@@ -23,3 +23,62 @@ jobs:
       - run: go test -race ./...
       - run: go build ./cmd/coroof
       - run: go run ./cmd/coroof validate-provider examples/provider.json
+
+  native-loop:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-bookworm
+        env:
+          POSTGRES_USER: coroof
+          POSTGRES_PASSWORD: coroof-test-only
+          POSTGRES_DB: coroof_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U coroof -d coroof_test"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+    env:
+      COROOF_TEST_DATABASE_URL: postgresql+psycopg://coroof:coroof-test-only@localhost:5432/coroof_test
+      COROOF_DATABASE_URL: postgresql+psycopg://coroof:coroof-test-only@localhost:5432/coroof_test
+      COROOF_REDIS_URL: redis://localhost:6379/0
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.13.6'
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: uv sync --project backend --frozen
+      - name: Python checks and PostgreSQL acceptance
+        working-directory: backend
+        run: |
+          uv run ruff check app worker tests migrations ../scripts
+          uv run ruff format --check app worker tests migrations ../scripts
+          uv run mypy app worker
+          uv run pytest -q
+          uv run alembic upgrade head
+          uv run alembic check
+          uv run python ../scripts/export_openapi.py
+      - run: npm ci
+      - run: npm run api:generate
+      - run: git diff --exit-code -- packages/api-client
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Live process smoke
+        working-directory: backend
+        run: |
+          uv run uvicorn app.main:app --host 127.0.0.1 --no-access-log &
+          uv run celery -A worker.app:celery worker --pool=solo --loglevel=WARNING &
+          for attempt in $(seq 1 30); do curl --fail --silent http://localhost:8000/readyz && break || sleep 1; done
+          uv run python -c 'from worker.app import ping; assert ping.delay().get(timeout=20) == "pong"'
+          uv run python ../scripts/acceptance.py --base-url http://localhost:8000
+      - run: docker compose -f infra/compose.yaml config --quiet

@@ -19,3 +19,14 @@ Thumbs.db
 go.work.sum
 
 /coroof
+
+# V1 application tooling and local data
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.pyc
+*.db
+.next/
+*.tsbuildinfo

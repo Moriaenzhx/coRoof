@@ -1,5 +1,7 @@
 # Development
 
+当前 V1 业务应用的启动、迁移与检查参见 [V1 开发说明](v1-development.md)。以下保留原有 Go 骨架与 Experience Compiler 的开发说明；本轮未修改其跨仓库协议。
+
 需要 Go 1.26+。在本仓库根目录运行 go fmt ./...、go vet ./...、go test ./...、go build ./cmd/coroof。CI 在 Linux 上额外运行 race 检查。
 
 Experience Compiler 位于 https://github.com/SolanZhang/experience-compiler ，使用 Node.js 24+，可单独运行 npm ci、npm test、npm run demo。
