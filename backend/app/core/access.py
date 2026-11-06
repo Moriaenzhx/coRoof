@@ -12,6 +12,7 @@ from app.infrastructure.models import (
     TenantEntity,
     WorkItem,
 )
+from app.modules.connectors.models import Connector, SourceLink
 
 
 def owner(actor: Membership) -> bool:
@@ -43,7 +44,9 @@ def tenant_get[T: TenantEntity](
         model.id == entity_id,
         model.organization_id == actor.organization_id,
     )
-    row = db.scalar(stmt.with_for_update() if lock else stmt)
+    row = db.scalar(
+        stmt.with_for_update().execution_options(populate_existing=True) if lock else stmt
+    )
     if row is None:
         fail("not_found", "未找到此记录", 404)
     assert row is not None
@@ -51,7 +54,23 @@ def tenant_get[T: TenantEntity](
 
 
 def work_scope(actor: Membership) -> Select[tuple[WorkItem]]:
-    stmt = select(WorkItem).where(WorkItem.organization_id == actor.organization_id)
+    published = (
+        select(SourceLink.work_item_id)
+        .join(
+            Connector,
+            (Connector.organization_id == SourceLink.organization_id)
+            & (Connector.id == SourceLink.connector_id),
+        )
+        .where(
+            SourceLink.organization_id == actor.organization_id,
+            SourceLink.state == "linked",
+            Connector.state == "active",
+        )
+    )
+    stmt = select(WorkItem).where(
+        WorkItem.organization_id == actor.organization_id,
+        or_(WorkItem.source_authority == "native", WorkItem.id.in_(published)),
+    )
     if owner(actor):
         return stmt
     if manager(actor):

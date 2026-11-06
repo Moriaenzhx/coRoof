@@ -30,3 +30,8 @@ __pycache__/
 *.db
 .next/
 *.tsbuildinfo
+
+# Deployment secrets and database backups
+**/server.env
+*.dump
+*.backup

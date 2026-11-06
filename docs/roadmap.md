@@ -1,6 +1,10 @@
 # Roadmap
 
+当前执行计划见 [V1.0 顺序交付与验收](v1-delivery.md)：按用户要求依次实施八阶段，每阶段验收通过后进入下一阶段；真实外部验收缺失不得以模拟通过代替。
+
 当前 V1 按任务书纵向推进：Phase 0 工程基线 → Slice 01 Native 组织工作闭环 → Slice 02 可信风险/证据/决策 → Slice 03 只读连接器 → Slice 04 可撤销决策记忆。后续范围见 [extensions.md](extensions.md)。以下为最初 Go Runtime 的历史路线，本轮不实施合同审批或 Experience Compiler 集成。
+
+2026-11-03 补充：后续采用以老板需求为中心的 Agent 能力层，暂不接入 Skills。优先在已交付事实/证据上建立模型提案、服务端授权和受控工具执行，再逐项接入后续 Slice 的数据来源与记忆。设计和验收见 [Agent 能力与执行边界](agent-capabilities.md)；此安排不表示后续能力已经实现。
 
 ## 0 — 项目初始化（当前）
 

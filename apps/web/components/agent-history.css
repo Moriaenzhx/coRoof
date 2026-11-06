@@ -1,0 +1,114 @@
+.agent-history {
+  min-width: 0;
+  padding: 22px 24px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--paper);
+}
+.agent-history-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.agent-history-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 16px;
+}
+.agent-history-heading p,
+.agent-history-note,
+.agent-history-message {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.agent-history-heading p {
+  margin: 7px 0 0;
+}
+.agent-history .agent-history-refresh {
+  min-height: 36px;
+  padding: 7px 10px;
+  font-size: 12px;
+}
+.agent-history-list {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.agent-history-list li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--line);
+}
+.agent-history-list li:last-child {
+  border-bottom: 0;
+}
+.agent-history-content {
+  min-width: 0;
+  flex: 1;
+}
+.agent-history-content h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.agent-history-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.agent-history-list button {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 7px 9px;
+  color: var(--accent);
+  font-size: 12px;
+}
+.agent-history-note {
+  margin: 12px 0 0;
+  font-size: 11px;
+}
+.agent-history-message {
+  margin: 18px 0 0;
+}
+.agent-history-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  color: var(--danger);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.agent-history-error p {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .agent-history {
+    padding: 18px 16px;
+  }
+  .agent-history-list li {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .agent-history-content {
+    flex-basis: 100%;
+  }
+  .agent-history button {
+    min-height: 44px;
+  }
+}

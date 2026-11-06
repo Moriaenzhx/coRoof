@@ -1,5 +1,7 @@
 # Phase 0 + Slice 01 验收报告
 
+> 前文是 Phase 0 / Slice 01 完成时的历史验收记录，文末保留后续摘要。当前八阶段交付、运行状态和测试结果见 [顺序交付](v1-delivery.md)。
+
 日期：2026-11-03。范围仅为仓库基线与 Native 组织工作闭环；不是生产上线，也没有进入 Slice 02–04。
 
 ## 已完成
@@ -56,3 +58,13 @@
 3. Slice 04：只保存 Owner 明确确认的偏好，提供查看、修改、撤销和删除；检索同时展示历史选择与实际结果，数据量证明必要时才引入向量检索。
 
 主要改动位于 `apps/web/`、`backend/`、`packages/api-client/`、`infra/`、`scripts/`、`docs/` 及根工具配置。运行命令与手工验收步骤见 [v1-development.md](v1-development.md)。未提交、推送或公开部署。
+
+阶段 4（2026-11-04）：只读连接器离线验收、页面和开发部署通过；PostgreSQL 171、SQLite 163（8 跳过）、Web 36。详见 [交付记录](v1-delivery.md) 与 [Slice 03](slice03.md)。源系统真实联调仍待测试范围；持续 Agent 已补入 [设计](continuous-agent.md)，不计作已交付运行能力。
+
+
+2026-11-04 阶段 6：PostgreSQL 215 / SQLite 203（12 skipped）/ Web 47 通过；静态检查与 Python/Web/Go 构建、标准 Compose 镜像、0010 迁移保留和元数据一致性通过。Coding Plan 开发模型 14/14 场景通过，21 次调用；经验、偏好、严格引用和来源改变复核已验证。详情见 `v1-delivery.md` 与 `decision-memory.md`，真实生产与自主循环尚未验收。
+
+
+阶段 7 离线身份与部署验收：PostgreSQL 249 全量 + 1 补充、SQLite 235 + 1（14 个 PG 专用跳过）、Web 53；静态检查、镜像、Go、0010→0011 升级、备份恢复、Caddy 配置和真实队列重启 smoke 通过。外部服务未配置，未开放生产。记录与失败修正见 [顺序交付](v1-delivery.md) 的阶段 7；截图 `.local/identity-desktop.jpg`。
+
+阶段 8：PostgreSQL 全量 289 通过、显式 Redis 进程测试单独 1 通过；SQLite 全量 270 通过、20 个环境专用跳过。最终上下文/决策事件变更 PostgreSQL 63 项补验通过；Web 59 项及账户菜单修复补验通过。Coding Plan 持续后台流程 7/7 场景、6 次真实开发调用通过；失败与改进记录、进程恢复、数据保留和发布边界见 [顺序交付](v1-delivery.md) 阶段 8。新增 0012–0016；没有自动创建真实企业策略，未连接真实外部业务、身份或邮件服务，未进行公网部署。

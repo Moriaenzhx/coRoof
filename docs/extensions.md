@@ -1,16 +1,18 @@
-# 后续扩展边界（设计契约，尚未实现）
+# 后续扩展边界
 
-## Slice 02：规则、证据、分析、决策
+## Agent 能力层（阶段 2–3 已实现）
 
-现有接缝：`WorkEvent` 是稳定事实入口；`get_work / work_scope / member_scope` 是权限入口；`UpdateProvider` 只接收已授权输入并返回 `ProposedFields`，没有数据库连接、凭据或执行工具。`AnalysisRun` 已包含最小审计元信息。本轮只有 RulesProvider。
+V1 暂不接入 Skills；以老板需求维护版本化业务能力目录。模型只提出能力及业务参数，服务端按当前权限、对象范围、确认条件和额度决定是否执行，并固定映射到底层工具。知识、经验与偏好也遵循相同边界。详见 [Agent 能力与执行边界](agent-capabilities.md)。当前读取、更新草稿、引用决策与人工确认已接入 LangChain / LangGraph；后续逐项接入连接器、知识和记忆。
 
-下一轮通过追加迁移引入 Signal、Evidence、Decision、DecisionOutcome。规则只消费已授权事实：明确阻塞、逾期未完成、临近节点与阻塞；无更新只能标为数据陈旧。每条分析记录 evidence_refs、分析版本和时间，不能编造统计指标。
+## Slice 02：已实现的扩展接缝
 
-新增模型 Provider 必须使用配置选择供应商，以 Pydantic 校验结构化结果，保留 rules_fallback 与错误状态。外部文本、资料和提示注入都是数据；不能修改系统指令或授权范围。不要默认把全文写入分析日志。结果改变业务前仍需人确认。
+Signal / EvidenceSnapshot / Decision / DecisionOutcome 已通过追加迁移 0002 实现；当前模型、权限、时间规则和运行方式见 [Slice 02](slice02.md)。WorkEvent 保持事实入口，get_work / work_scope 保持授权入口。AnalysisRun 记录结构化问答结果与审计元信息，配置式模型适配器只返回受限建议；未配置或失败时明确降级。
 
-Decision 的选项和 context_snapshot 固定在记录中；确认时重新校验租户、角色、信号与版本。Owner 明确选择后才变更决策；禁止通过 AI 建议发外部消息或改源系统。确认越权测试必须随着真正的决策接口补充，本轮只验证未开放路径返回 404。
+Decision 固定当时的事实、信号版本和选项；Owner 明确确认并记录实际结果。没有外部执行工具、长期偏好学习或跨系统写操作。只读连接器已有离线实现，决策记忆已按 [阶段 6](decision-memory.md) 完成开发验收。
 
 ## Slice 03：只读连接器
+
+当前离线实现、框架复用、可靠投递与待真实联调边界见 [Slice 03](slice03.md)。以下保留接口设计目标；当前支持显式配置单个范围，未实现自动范围发现和 webhook。
 
 后续 Connector 接口至少包含：
 

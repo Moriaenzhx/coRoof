@@ -1,0 +1,945 @@
+/* Shared controls; each product surface owns its information hierarchy. */
+:root {
+  --ink: #242933;
+  --text: #515b6a;
+  --muted: #626d7c;
+  --accent: #25365b;
+  --accent-hover: #192847;
+  --accent-soft: #edf0f6;
+  --line: #e8ebef;
+  --control-line: #8993a2;
+  --paper: #fff;
+  --wash: #fafbfc;
+  --soft: #f3f5f8;
+  --sidebar-bg: #f3f5f7;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+.app-shell .main-column {
+  background: var(--wash);
+  min-height: 100dvh;
+}
+.app-shell .workspace {
+  max-width: 1240px;
+  padding-inline: 40px;
+  padding-top: 24px;
+}
+.app-shell .page-heading {
+  margin-bottom: 22px;
+}
+.app-shell .page-heading h1 {
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.6px;
+}
+.app-shell .page-heading p {
+  font-size: 14px;
+  line-height: 1.7;
+}
+.app-shell .heading-actions {
+  gap: 12px;
+}
+.app-shell .heading-actions > button:not(.icon-button) {
+  font-size: 13px;
+  min-height: 40px;
+}
+.app-shell .sync-status {
+  font-size: 12px;
+  color: var(--muted);
+}
+.app-shell .sidebar {
+  padding: 20px 14px 18px;
+  border-color: #e9ecf0;
+}
+.app-shell .sidebar-header {
+  margin-bottom: 28px;
+}
+.app-shell .sidebar .brand {
+  font-size: 23px;
+  letter-spacing: -0.8px;
+}
+.app-shell .sidebar nav {
+  gap: 24px;
+}
+.app-shell .nav-group-label {
+  font-size: 12px;
+  padding-bottom: 8px;
+  color: var(--muted);
+}
+.app-shell .sidebar nav button {
+  border-radius: 11px;
+  min-height: 44px;
+  font-size: 14px;
+  padding: 10px 12px;
+  gap: 12px;
+}
+.app-shell .sidebar nav button svg {
+  width: 19px;
+  height: 19px;
+  stroke-width: 1.7;
+}
+.app-shell .sidebar nav button.active {
+  background: #e8ecf3;
+  color: #25365b;
+}
+.app-shell .sidebar nav button.active::before {
+  display: none;
+}
+.app-shell .sidebar nav button:not(.active):hover {
+  background: #eaeef2;
+}
+.app-shell .sidebar-user {
+  border-top-color: #e1e6eb;
+}
+.app-shell .sidebar-user small {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.app-shell button {
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.app-shell button:hover {
+  border-color: #ccd3de;
+}
+.app-shell button:disabled {
+  cursor: not-allowed;
+}
+.app-shell .primary {
+  box-shadow: 0 2px 4px #1b2b4c0a;
+}
+.app-shell .primary:hover {
+  box-shadow: 0 3px 10px #1b2b4c16;
+  border-color: var(--accent-hover);
+}
+.app-shell .plain:hover,
+.app-shell .icon-button:hover {
+  border-color: transparent;
+  background: #edf0f5;
+}
+.app-shell input:not([type="checkbox"]):not([type="radio"]),
+.app-shell textarea,
+.app-shell select {
+  border-color: var(--control-line);
+  font-size: 15px;
+}
+.app-shell input:focus-visible,
+.app-shell textarea:focus-visible,
+.app-shell select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.app-shell label {
+  font-size: 14px;
+}
+.app-shell .fine-print {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.app-shell .status-label {
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 7px;
+}
+.app-shell .tag {
+  font-size: 12px;
+}
+.app-shell .overview-workspace,
+.app-shell .personal-workspace {
+  gap: 30px;
+}
+
+/* Panorama is the first, distinctive surface; the work below reads as a list. */
+.app-shell .organization-overview {
+  border-color: #e8ecf2;
+  border-radius: 22px;
+  box-shadow: 0 4px 22px #26395a04;
+  overflow: hidden;
+}
+.app-shell .organization-overview-toggle {
+  padding: 20px 26px 6px;
+  border-radius: 0;
+}
+.app-shell .organization-overview-toggle:hover {
+  background: #fbfcfe;
+}
+.app-shell .organization-overview-toggle strong {
+  font-size: 18px;
+  letter-spacing: -0.3px;
+}
+.app-shell .organization-overview-toggle small {
+  font-size: 12px;
+}
+.app-shell .organization-overview-expand {
+  font-size: 12px;
+}
+.app-shell .panorama.living-panorama {
+  padding: 10px 28px 44px;
+  min-height: 320px;
+  gap: 28px;
+  background: radial-gradient(ellipse at 75% 45%, #f4f7fc 0, #fff 65%);
+}
+.app-shell .living-panorama .orbit {
+  min-height: 305px;
+}
+.app-shell .living-panorama .panorama-summary h2 {
+  font-size: clamp(26px, 2.1vw, 32px);
+  margin-top: 17px;
+  line-height: 1.4;
+  letter-spacing: -0.8px;
+}
+.app-shell .panorama-summary > p {
+  font-size: 13px;
+  line-height: 1.8;
+  max-width: 340px;
+}
+.app-shell .living-panorama .summary-numbers {
+  margin-top: 14px;
+}
+.app-shell .living-panorama .summary-numbers strong {
+  font-size: 25px;
+  font-weight: 600;
+}
+.app-shell .summary-numbers span {
+  font-size: 12px;
+}
+.app-shell .panorama-summary .text-action {
+  min-height: 40px;
+  padding: 9px 14px;
+  font-size: 13px;
+}
+.app-shell .panorama-caption {
+  font-size: 11px;
+  left: 28px;
+  right: 28px;
+}
+.app-shell .living-panorama .department-node {
+  border-radius: 14px;
+  padding: 11px 13px;
+  min-width: 155px;
+  box-shadow: 0 5px 18px #27395806;
+}
+.app-shell .department-node strong {
+  font-size: 13px;
+}
+.app-shell .department-node small {
+  font-size: 11px;
+}
+.app-shell .living-panorama .panorama-core-name {
+  font-size: 12px;
+}
+.app-shell .living-panorama .panorama-core-hint {
+  font-size: 11px;
+}
+.app-shell .living-panorama .orbit-core {
+  box-shadow:
+    0 6px 22px #26395808,
+    0 0 0 7px #ffffff8f;
+}
+.app-shell .project-overview {
+  gap: 18px;
+  padding-inline: 4px;
+}
+.app-shell .project-overview-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
+.app-shell .project-overview-card {
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  padding: 22px 0;
+  background: transparent;
+}
+.app-shell .project-overview-title h3 {
+  font-size: 16px;
+}
+.app-shell .project-overview-goal {
+  font-size: 14px;
+  max-width: 880px;
+  margin: 7px 0 10px;
+}
+.app-shell .project-overview-facts {
+  font-size: 12px;
+}
+.app-shell .project-overview-facts > span:last-child {
+  flex-basis: auto;
+}
+.app-shell .project-overview-progress {
+  font-size: 14px;
+  margin-top: 10px;
+}
+.app-shell .project-overview-details {
+  font-size: 12px;
+}
+.app-shell .project-overview-scope {
+  font-size: 12px;
+}
+.app-shell .overview-secondary {
+  border-color: var(--line);
+  padding-top: 0;
+  border-top: 0;
+}
+.app-shell .overview-secondary > summary {
+  font-size: 13px;
+  padding-block: 10px;
+}
+.app-shell .workspace-footer {
+  font-size: 12px;
+  border: 0;
+  color: var(--muted);
+}
+
+/* The same readable controls and rhythm apply outside the home screen. */
+.app-shell .settings-card,
+.app-shell .project-card,
+.app-shell .panel {
+  border-color: var(--line);
+  border-radius: 18px;
+  box-shadow: 0 3px 15px #26395a03;
+}
+.app-shell .project-goal {
+  font-size: 14px;
+}
+.app-shell .project-facts,
+.app-shell .project-legend,
+.app-shell .project-scope {
+  font-size: 13px;
+}
+.app-shell .project-card {
+  padding: 24px 26px 0;
+}
+.app-shell .work-arrangements {
+  margin-block: 24px;
+}
+.app-shell .work-arrangements > h3 {
+  font-size: 16px;
+  margin-bottom: 14px;
+}
+.app-shell .work-arrangement {
+  border-left: 3px solid #d9e0eb;
+  padding: 2px 0 2px 16px;
+  margin-block: 18px;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.8;
+}
+.app-shell .work-arrangement[data-selected] {
+  border-left-color: var(--accent);
+}
+.app-shell .work-arrangement p {
+  margin: 0 0 8px;
+}
+.app-shell .work-arrangement .arrangement-plan {
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 15px;
+}
+.app-shell .work-arrangement small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+.app-shell .arrangement-latest-feedback {
+  margin-top: 14px;
+}
+.app-shell .arrangement-feedback-history article {
+  margin-block: 14px;
+}
+.app-shell .work-arrangement > button {
+  margin-top: 12px;
+  font-size: 13px;
+}
+.app-shell .my-work-order > span {
+  font-size: 12px;
+}
+.app-shell .knowledge-list h3 {
+  font-size: 16px;
+}
+.app-shell .knowledge-list p {
+  font-size: 14px;
+}
+.app-shell .facts dt {
+  font-size: 12px;
+}
+.app-shell .facts dd {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.app-shell .drawer {
+  border-radius: 22px;
+  box-shadow:
+    0 24px 90px #24355324,
+    0 4px 18px #24355308;
+}
+.app-shell .drawer-inner {
+  padding: 28px;
+}
+.app-shell .drawer-inner > header {
+  align-items: center;
+}
+.app-shell .drawer-inner > header h2 {
+  font-size: 21px;
+  margin: 0;
+}
+.app-shell .drawer-inner > header .eyebrow {
+  display: none;
+}
+.app-shell .detail-meta {
+  font-size: 13px;
+}
+.app-shell .update-section > .muted {
+  font-size: 13px;
+}
+.app-shell .quick-actions button {
+  font-size: 13px;
+}
+.app-shell .decision-effect {
+  font-size: 13px;
+}
+.app-shell .draft-methods,
+.app-shell .draft-original {
+  margin-block: 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.app-shell .draft-methods summary,
+.app-shell .draft-original summary {
+  cursor: pointer;
+  padding-block: 8px;
+}
+.app-shell .draft-methods .settings-actions {
+  margin-top: 8px;
+}
+
+/* A calm command surface: soft focus, a legible reply, and no modal backdrop. */
+.app-shell .command-dock {
+  padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+}
+.app-shell .command-dock::before {
+  inset: -10px 0 0;
+  background: linear-gradient(transparent, #fafbfcf2 85%);
+}
+.app-shell .command-dock > .coroof-command-bar {
+  max-width: 760px;
+  border-color: #e0e5ec;
+  border-radius: 23px;
+  padding: 16px 20px 12px;
+  background: #ffffffed;
+  box-shadow:
+    0 8px 32px #273b5c0c,
+    0 2px 7px #273b5c05;
+  backdrop-filter: blur(18px);
+}
+.app-shell .command-dock > .coroof-command-bar:focus-within {
+  border-color: #7d8ca6;
+  box-shadow:
+    0 8px 32px #273b5c10,
+    0 0 0 3px #a9bbda13;
+}
+.app-shell .coroof-command-bar textarea {
+  font-size: 16px;
+  line-height: 26px;
+  min-height: 48px;
+  max-height: 130px;
+}
+.app-shell .coroof-command-bar textarea:focus-visible {
+  outline: 0;
+}
+.app-shell .coroof-command-bar textarea::placeholder {
+  color: var(--muted);
+}
+.app-shell .coroof-command-bar:not([data-expanded]) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px 44px;
+  align-items: center;
+  column-gap: 4px;
+}
+.app-shell .coroof-command-bar:not([data-expanded]) textarea {
+  --composer-min-lines: 1;
+  min-height: 26px;
+  max-height: 26px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.app-shell .coroof-command-bar:not([data-expanded]) .coroof-command-footer,
+.app-shell .coroof-command-bar:not([data-expanded]) .coroof-command-tools,
+.app-shell .coroof-command-bar:not([data-expanded]) .coroof-command-send {
+  display: contents;
+}
+.app-shell .coroof-command-bar:not([data-expanded]) .coroof-command-shortcut,
+.app-shell .coroof-command-bar:not([data-expanded]) .coroof-command-hint {
+  display: none;
+}
+.app-shell .coroof-command-context {
+  grid-column: 1 / -1;
+}
+.app-shell .coroof-command-tools,
+.app-shell .coroof-command-shortcut,
+.app-shell .coroof-command-hint {
+  font-size: 12px;
+}
+.app-shell .assistant-overlay-panel {
+  border-radius: 24px;
+  background: #ffffffeb;
+  box-shadow:
+    0 18px 65px #293a5417,
+    0 4px 18px #293a5408;
+  backdrop-filter: blur(20px) saturate(110%);
+}
+.app-shell .assistant-overlay-heading {
+  padding: 22px 26px 16px;
+}
+.app-shell .assistant-overlay-content {
+  padding: 4px 26px 16px;
+}
+.app-shell .assistant-overlay-heading h2 {
+  font-size: 18px;
+}
+.app-shell .assistant-overlay-heading p {
+  font-size: 13px;
+}
+.app-shell .assistant-answer-copy {
+  font-size: 16px;
+  line-height: 1.85;
+}
+.app-shell .assistant-question {
+  font-size: 14px;
+  background: #edf1f580;
+  border-radius: 12px;
+  padding: 12px 15px;
+  color: #586779;
+}
+.app-shell .assistant-answer-details,
+.app-shell .assistant-overlay-content .ai-context {
+  font-size: 13px;
+}
+.app-shell .assistant-overlay-footer {
+  padding: 8px 26px 18px;
+}
+.app-shell .assistant-progress-line {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  font-size: 14px;
+}
+.app-shell .assistant-progress-line:has(+ .assistant-recovery-actions)::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #9ba9c1;
+}
+
+@media (min-width: 1101px) {
+  .app-shell:not(.sidebar-collapsed) {
+    --sidebar-width: 214px;
+  }
+}
+@media (min-width: 601px) {
+  .app-shell.sidebar-collapsed .sidebar {
+    padding-inline: 8px;
+  }
+  .app-shell.sidebar-collapsed .sidebar nav button {
+    justify-content: center;
+    padding: 10px 0;
+    gap: 0;
+  }
+}
+@media (max-width: 1100px) {
+  .app-shell .workspace {
+    padding-inline: 24px;
+  }
+  .app-shell .panorama.living-panorama {
+    padding-inline: 20px;
+    gap: 16px;
+  }
+  .app-shell .living-panorama .department-node {
+    min-width: 144px;
+    padding: 10px;
+  }
+}
+@container workspace (max-width: 720px) {
+  .app-shell .panorama.living-panorama {
+    grid-template-columns: 1fr;
+  }
+  .app-shell .living-panorama .panorama-summary {
+    padding-block: 10px;
+  }
+}
+@container workspace (max-width: 960px) {
+  .app-shell .living-panorama .orbit {
+    min-height: 0;
+  }
+}
+@media (max-width: 600px) {
+  .app-shell .workspace {
+    padding: 20px 18px calc(var(--command-dock-height, 150px) + 28px);
+  }
+  .app-shell .sidebar {
+    padding: 10px 12px;
+  }
+  .app-shell .sidebar-header {
+    margin-bottom: 0;
+  }
+  .app-shell .sidebar nav {
+    gap: 6px;
+  }
+  .app-shell .sidebar nav button {
+    font-size: 13px;
+    padding: 10px;
+  }
+  .app-shell .page-heading h1 {
+    font-size: 24px;
+  }
+  .app-shell .page-heading p {
+    font-size: 13px;
+  }
+  .app-shell .overview-workspace,
+  .app-shell .personal-workspace {
+    gap: 24px;
+  }
+  .app-shell .organization-overview-toggle {
+    padding: 18px 18px 6px;
+    gap: 8px;
+  }
+  .app-shell .organization-overview-toggle strong {
+    font-size: 17px;
+  }
+  .app-shell .organization-overview-expand {
+    font-size: 11px;
+  }
+  .app-shell .panorama.living-panorama {
+    padding: 14px 18px 18px;
+    gap: 20px;
+    min-height: 0;
+  }
+  .app-shell .living-panorama .orbit {
+    min-height: 0;
+  }
+  .app-shell .living-panorama .panorama-summary h2 {
+    font-size: 26px;
+  }
+  .app-shell .living-panorama .department-node {
+    min-width: 0;
+    padding: 12px;
+  }
+  .app-shell .panorama-caption {
+    position: static;
+    margin-top: 4px;
+    font-size: 11px;
+  }
+  .app-shell .overview-inbox {
+    padding: 0;
+  }
+  .app-shell .overview-inbox-row {
+    align-items: stretch;
+    gap: 10px;
+    padding-block: 18px;
+  }
+  .app-shell .overview-inbox-heading h2,
+  .app-shell .project-overview-heading h2 {
+    font-size: 19px;
+  }
+  .app-shell .overview-inbox-heading p {
+    font-size: 13px;
+  }
+  .app-shell .overview-inbox-row h3 {
+    font-size: 16px;
+  }
+  .app-shell .overview-inbox-row-actions {
+    justify-content: flex-start;
+  }
+  .app-shell .overview-inbox-row-actions button,
+  .app-shell .my-work-actions button,
+  .app-shell .quick-actions button {
+    min-height: 44px;
+  }
+  .app-shell .project-overview {
+    padding-inline: 0;
+  }
+  .app-shell .project-overview-facts > span:last-child {
+    flex-basis: 100%;
+  }
+  .app-shell .project-card {
+    padding: 20px 18px 0;
+  }
+  .app-shell .drawer-inner {
+    padding: 20px;
+  }
+  .app-shell .drawer-inner > header h2 {
+    font-size: 20px;
+  }
+  .app-shell .facts {
+    gap: 16px;
+  }
+  .app-shell .command-dock {
+    padding: 0 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  .app-shell .command-dock > .coroof-command-bar {
+    border-radius: 19px;
+    padding: 13px 15px 10px;
+  }
+  .app-shell .coroof-command-bar textarea {
+    font-size: 16px;
+  }
+  .app-shell .assistant-overlay-heading {
+    padding: 16px 18px 12px;
+  }
+  .app-shell .assistant-overlay-content {
+    padding: 4px 18px 14px;
+  }
+  .app-shell .assistant-overlay-footer {
+    padding: 6px 18px 14px;
+  }
+  .app-shell .assistant-answer-copy {
+    font-size: 15px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell button {
+    transition: none;
+  }
+}
+
+/* Mobile is a workspace of its own: thumb navigation and an expandable composer.
+   Navigation space is part of the measured dock, shared by content, mascot and reply. */
+@media (max-width: 600px) {
+  .app-shell {
+    --mobile-nav-height: 62px;
+    --mobile-header-height: 58px;
+  }
+  .app-shell[data-keyboard-open] {
+    --mobile-nav-height: 0px;
+  }
+  .app-shell .sidebar {
+    position: sticky;
+    top: 0;
+    height: var(--mobile-header-height);
+    width: 100%;
+    padding: 10px 16px;
+    overflow: visible;
+    z-index: 70;
+    background: #fafbfd;
+    border-bottom: 1px solid var(--line);
+  }
+  .app-shell .sidebar-header {
+    margin: 0;
+  }
+  .app-shell .sidebar .brand {
+    font-size: 22px;
+  }
+  .app-shell .sidebar .account-root {
+    top: 8px;
+    right: 14px;
+  }
+  .app-shell .account-trigger {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .app-shell .account-identity {
+    display: block;
+    max-width: 112px;
+  }
+  .app-shell .account-identity strong {
+    font-size: 12px;
+  }
+  .app-shell .account-identity small {
+    font-size: 10px;
+  }
+  .app-shell .account-chevron {
+    display: none;
+  }
+  .app-shell .sidebar .account-popover {
+    top: 60px;
+    right: 10px;
+    max-width: calc(100vw - 20px);
+  }
+  .app-shell .sidebar nav {
+    position: fixed;
+    inset: auto 0 0;
+    width: 100%;
+    height: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px));
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    padding: 4px 6px calc(4px + env(safe-area-inset-bottom, 0px));
+    gap: 2px;
+    border-top: 1px solid #e3e8ef;
+    background: #fff;
+    box-shadow: 0 -4px 22px #24355005;
+    overflow: visible;
+  }
+  .app-shell .sidebar .nav-group,
+  .app-shell .sidebar .nav-group-items {
+    display: contents;
+  }
+  .app-shell .sidebar .nav-group-label {
+    display: none;
+  }
+  .app-shell .sidebar nav button {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    width: 100%;
+    min-height: 52px;
+    padding: 5px 1px;
+    font-size: 11px;
+    border-radius: 12px;
+    white-space: nowrap;
+    background: transparent;
+  }
+  .app-shell .sidebar nav button svg {
+    width: 20px;
+    height: 20px;
+  }
+  .app-shell .sidebar nav button.active {
+    background: #edf1f8;
+  }
+  .app-shell[data-keyboard-open] .sidebar nav {
+    display: none;
+  }
+  .app-shell .workspace {
+    padding: 18px 16px calc(var(--command-dock-height, 140px) + 24px);
+  }
+  .app-shell .page-heading {
+    margin-bottom: 20px;
+    gap: 10px;
+  }
+  .app-shell .page-heading h1 {
+    font-size: 25px;
+  }
+  .app-shell .heading-actions {
+    flex-wrap: wrap;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin-left: auto;
+    gap: 8px;
+  }
+  .app-shell .heading-actions .sync-status {
+    font-size: 11px;
+    flex-basis: auto;
+    width: auto;
+  }
+  .app-shell .heading-actions > button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .app-shell .organization-overview-toggle {
+    padding: 18px;
+  }
+  .app-shell .organization-overview-toggle small {
+    font-size: 11px;
+  }
+  .app-shell .organization-overview-expand {
+    flex-shrink: 0;
+  }
+  .app-shell .living-panorama .orbit-nodes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .app-shell .living-panorama .department-node {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px;
+    gap: 5px;
+  }
+  .app-shell .living-panorama .node-icon {
+    display: none;
+  }
+  .app-shell .command-dock {
+    left: 0;
+    padding: 0 12px
+      calc(var(--mobile-nav-height) + 8px + env(safe-area-inset-bottom, 0px));
+  }
+  .app-shell .command-dock::before {
+    background: none;
+  }
+  .app-shell .command-dock > .coroof-command-bar {
+    padding: 8px 12px;
+    border: 1px solid #cad3e2;
+    border-radius: 20px;
+    background: #fffffff5;
+    box-shadow: 0 4px 24px #273b5c12;
+  }
+  .app-shell .coroof-command-bar textarea {
+    --composer-min-lines: 2;
+    min-height: 52px;
+    font-size: 16px;
+  }
+  .app-shell .coroof-command-bar:not([data-expanded]) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 44px 44px;
+    align-items: center;
+    column-gap: 2px;
+    border-radius: 18px;
+  }
+  .app-shell .coroof-command-bar:not([data-expanded]) textarea {
+    --composer-min-lines: 1;
+    min-height: 26px;
+    max-height: 26px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .app-shell .coroof-command-bar:not([data-expanded]) .coroof-command-footer,
+  .app-shell .coroof-command-bar:not([data-expanded]) .coroof-command-tools,
+  .app-shell .coroof-command-bar:not([data-expanded]) .coroof-command-send {
+    display: contents;
+  }
+  .app-shell .coroof-command-bar .coroof-command-shortcut,
+  .app-shell .coroof-command-bar:not([data-expanded]) .coroof-command-hint {
+    display: none;
+  }
+  .app-shell .coroof-command-context {
+    grid-column: 1 / -1;
+    font-size: 12px;
+  }
+  .app-shell .coroof-command-bar button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .app-shell .assistant-overlay {
+    inset: calc(var(--mobile-header-height) + 8px) 10px
+      calc(
+        var(--command-dock-height, 140px) + var(--keyboard-offset, 0px) + 8px
+      );
+  }
+  .app-shell .drawer {
+    width: calc(100vw - 20px);
+    max-width: calc(100vw - 20px);
+    max-height: calc(100dvh - 24px);
+    border-radius: 20px;
+  }
+  .app-shell .drawer-inner {
+    padding: 20px 16px;
+  }
+  .app-shell input:not([type="checkbox"]):not([type="radio"]),
+  .app-shell textarea,
+  .app-shell select {
+    font-size: 16px;
+  }
+  .app-shell .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .app-shell .form-actions > button {
+    flex: 1;
+    min-height: 44px;
+  }
+  .app-shell .settings-card {
+    padding: 18px 16px;
+  }
+  .app-shell .settings-tabs {
+    flex-wrap: wrap;
+  }
+}

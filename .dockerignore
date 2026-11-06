@@ -14,3 +14,8 @@ node_modules
 **/.env
 **/.env.*
 !**/.env.example
+
+# Deployment secrets and database backups
+**/server.env
+*.dump
+*.backup

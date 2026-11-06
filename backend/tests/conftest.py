@@ -16,6 +16,10 @@ from app.main import app
 
 @pytest.fixture(autouse=True)
 def database(tmp_path, monkeypatch):
+    # Offline tests must never inherit a developer's real model configuration.
+    monkeypatch.setenv("COROOF_AI_PROVIDER", "rules")
+    monkeypatch.setenv("COROOF_AI_API_KEY", "")
+    monkeypatch.setenv("COROOF_AI_MODEL_VERIFIED", "false")
     base_url = os.environ.get("COROOF_TEST_DATABASE_URL")
     admin = None
     schema = "test_" + uuid4().hex

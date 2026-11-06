@@ -1,0 +1,220 @@
+# Standalone production template. Do not merge with development port mappings.
+name: coroof-production
+services:
+  postgres:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_USER: coroof
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set strong database password}
+      POSTGRES_DB: coroof
+    volumes:
+    - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U coroof -d coroof
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set strong queue password}
+    command:
+    - sh
+    - -c
+    - umask 077; printf "requirepass %s\nappendonly yes\n" "$$REDIS_PASSWORD" > /tmp/redis.conf;
+      exec redis-server /tmp/redis.conf
+    volumes:
+    - redis-data:/data
+  migrate:
+    build:
+      context: ..
+      dockerfile: infra/backend.Dockerfile
+    command:
+    - /app/.venv/bin/alembic
+    - upgrade
+    - head
+    environment: &id001
+      COROOF_ENVIRONMENT: production
+      COROOF_AUTH_MODE: oidc
+      COROOF_DELIVERY_MODE: smtp
+      COROOF_COOKIE_SECURE: 'true'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'no'
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    env_file:
+    - ${COROOF_SERVER_ENV_FILE:?Set absolute private server env path}
+  api:
+    build:
+      context: ..
+      dockerfile: infra/backend.Dockerfile
+    command:
+    - /app/.venv/bin/uvicorn
+    - app.main:app
+    - --host
+    - 0.0.0.0
+    - --no-access-log
+    environment: *id001
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+      - CMD
+      - uv
+      - run
+      - --no-sync
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://localhost:8000/readyz')
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    env_file:
+    - ${COROOF_SERVER_ENV_FILE:?Set absolute private server env path}
+    stop_grace_period: 90s
+  worker:
+    init: true
+    stop_grace_period: 180s
+    build:
+      context: ..
+      dockerfile: infra/backend.Dockerfile
+    command:
+    - /app/.venv/bin/celery
+    - -A
+    - worker.app:celery
+    - worker
+    - --loglevel=WARNING
+    - --concurrency=2
+    - --hostname=coroof@%h
+    environment: *id001
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - uv run --no-sync celery -A worker.app:celery inspect ping -d coroof@$$HOSTNAME
+        --timeout=3
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    env_file:
+    - ${COROOF_SERVER_ENV_FILE:?Set absolute private server env path}
+  scheduler:
+    init: true
+    build:
+      context: ..
+      dockerfile: infra/backend.Dockerfile
+    command:
+    - /app/.venv/bin/celery
+    - -A
+    - worker.app:celery
+    - beat
+    - --loglevel=WARNING
+    - --schedule=/tmp/coroof-beat
+    environment: *id001
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    env_file:
+    - ${COROOF_SERVER_ENV_FILE:?Set absolute private server env path}
+  web:
+    build:
+      context: ..
+      dockerfile: infra/web.Dockerfile
+    environment:
+      API_INTERNAL_URL: http://api:8000
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD
+      - node
+      - -e
+      - fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+    - 80:80
+    - 443:443
+    environment:
+      COROOF_DOMAIN: ${COROOF_DOMAIN:?Set production DNS name}
+    volumes:
+    - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    - caddy-data:/data
+    - caddy-config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+volumes:
+  postgres-data: null
+  redis-data: null
+  caddy-data: null
+  caddy-config: null

@@ -1,5 +1,6 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Literal
+from uuid import UUID
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, EmailStr, Field, field_validator
@@ -84,14 +85,31 @@ class MeOut(DTO):
     id: str
     name: str
     email: str
-    mode: Literal["mock"] = "mock"
+    mode: Literal["mock", "oidc"] = "mock"
     memberships: list[MembershipContext]
 
 
 class InviteInput(DTO):
+    idempotency_key: UUID | None = None
     email: EmailStr
     department_id: str
     roles: list[Literal["manager", "member"]] = Field(default=["member"], min_length=1)
+
+
+class DeliveryStatus(DTO):
+    mode: Literal["smtp"] = "smtp"
+    state: Literal["queued", "sending", "retry_wait", "accepted", "unknown", "failed", "cancelled"]
+    version: int
+    attempts: int
+    accepted_at: datetime | None
+    last_error: str | None
+    notice: str = "邮件服务接受不等于收件箱送达；发送中无法撤回，邀请可单独撤销。"
+
+
+class DeliveryRetry(DTO):
+    expected_version: int = Field(ge=1)
+    confirm: Literal[True]
+    idempotency_key: UUID
 
 
 class InviteOut(DTO):
@@ -102,10 +120,11 @@ class InviteOut(DTO):
     expires_at: datetime
     revoked: bool
     accepted_at: datetime | None
+    delivery_status: DeliveryStatus | None = None
 
 
 class InviteDelivery(InviteOut):
-    delivery: MockDelivery
+    delivery: MockDelivery | DeliveryStatus | None
 
 
 class InitiativeInput(DTO):
@@ -130,6 +149,11 @@ class WorkInput(DTO):
     owner_id: str | None = None
     due_at: AwareDatetime | None = None
 
+    @field_validator("due_at")
+    @classmethod
+    def due_in_utc(cls, value: datetime | None) -> datetime | None:
+        return value.astimezone(UTC) if value else value
+
 
 class AssignmentInput(DTO):
     owner_id: str | None
@@ -146,6 +170,14 @@ class WorkOut(WorkInput):
     updated_at: datetime
     version: int
 
+    @field_validator("due_at", "updated_at", mode="before")
+    @classmethod
+    def restore_database_timezone(cls, value: object) -> object:
+        # SQLite drops tzinfo on persisted UTC timestamps; input DTOs still require it.
+        if isinstance(value, datetime) and value.tzinfo is None:
+            return value.replace(tzinfo=UTC)
+        return value
+
 
 class ProposedFields(DTO):
     summary: str = Field(min_length=1, max_length=4000)
@@ -156,6 +188,7 @@ class ProposedFields(DTO):
 class DraftInput(DTO):
     work_item_id: str
     raw_text: str = Field(min_length=1, max_length=4000)
+    decision_id: str | None = None
 
 
 class DraftEdit(DTO):
@@ -167,6 +200,7 @@ class DraftOut(DTO):
     id: str
     organization_id: str
     work_item_id: str
+    decision_id: str | None = None
     actor_id: str
     raw_text: str
     proposed_fields: ProposedFields
@@ -231,8 +265,8 @@ class DashboardOut(DTO):
     last_updated_at: datetime | None
     generated_at: datetime
     scope: Literal["organization", "department", "assigned"]
-    source: Literal["native"] = "native"
-    external_data: Literal["not_connected"] = "not_connected"
+    source: Literal["native", "mixed"] = "native"
+    external_data: Literal["not_connected", "partial"] = "not_connected"
     analysis_mode: Literal["rules"] = "rules"
 
 

@@ -27,7 +27,23 @@ services:
     environment: &backend-env
       COROOF_ENVIRONMENT: development
       COROOF_AUTH_MODE: mock
-      COROOF_AI_PROVIDER: rules
+      COROOF_AI_PROVIDER: ${COROOF_AI_PROVIDER:-rules}
+      COROOF_AI_BASE_URL: ${COROOF_AI_BASE_URL:-}
+      COROOF_AI_MODEL: ${COROOF_AI_MODEL:-}
+      COROOF_AI_API_KEY: ${COROOF_AI_API_KEY:-}
+      COROOF_AI_MODEL_VERIFIED: ${COROOF_AI_MODEL_VERIFIED:-false}
+      COROOF_AI_TIMEOUT_SECONDS: ${COROOF_AI_TIMEOUT_SECONDS:-25}
+      COROOF_AI_MAX_INPUT_TOKENS: ${COROOF_AI_MAX_INPUT_TOKENS:-24000}
+      COROOF_AI_MAX_OUTPUT_TOKENS: ${COROOF_AI_MAX_OUTPUT_TOKENS:-2500}
+      COROOF_AI_DAILY_CALL_LIMIT: ${COROOF_AI_DAILY_CALL_LIMIT:-100}
+      COROOF_AI_DAILY_TOKEN_LIMIT: ${COROOF_AI_DAILY_TOKEN_LIMIT:-200000}
+      COROOF_AI_MONTHLY_TOKEN_LIMIT: ${COROOF_AI_MONTHLY_TOKEN_LIMIT:-6000000}
+      COROOF_AI_CONCURRENCY_LIMIT: ${COROOF_AI_CONCURRENCY_LIMIT:-2}
+      COROOF_AI_OUTPUT_MODE: ${COROOF_AI_OUTPUT_MODE:-schema}
+      COROOF_AI_SECRET_KEY: ${COROOF_AI_SECRET_KEY:-}
+      COROOF_CONNECTOR_ALLOWED_BASE_URLS: ${COROOF_CONNECTOR_ALLOWED_BASE_URLS:-[]}
+      COROOF_AI_ALLOWED_BASE_URLS: ${COROOF_AI_ALLOWED_BASE_URLS:-[]}
+      COROOF_AI_DEVELOPMENT_TEST_CONNECTION_IDS: ${COROOF_AI_DEVELOPMENT_TEST_CONNECTION_IDS:-[]}
       COROOF_DATABASE_URL: postgresql+psycopg://coroof:${POSTGRES_PASSWORD:-coroof-local-only}@postgres:5432/coroof
       COROOF_REDIS_URL: redis://redis:6379/0
       COROOF_WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
@@ -47,7 +63,7 @@ services:
       retries: 20
   worker:
     init: true
-    stop_grace_period: 30s
+    stop_grace_period: 180s
     build: {context: .., dockerfile: infra/backend.Dockerfile}
     command: ["/app/.venv/bin/celery", "-A", "worker.app:celery", "worker", "--loglevel=WARNING", "--concurrency=2", "--hostname=coroof@%h"]
     environment: *backend-env
@@ -59,6 +75,14 @@ services:
       interval: 15s
       timeout: 10s
       retries: 10
+  scheduler:
+    init: true
+    build: {context: .., dockerfile: infra/backend.Dockerfile}
+    command: ["/app/.venv/bin/celery", "-A", "worker.app:celery", "beat", "--loglevel=WARNING", "--schedule=/tmp/coroof-beat"]
+    environment: *backend-env
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
   web:
     build: {context: .., dockerfile: infra/web.Dockerfile}
     environment:

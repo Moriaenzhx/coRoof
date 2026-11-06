@@ -30,6 +30,7 @@ from app.core.schemas import (
     WorkOut,
 )
 from app.infrastructure.models import (
+    AgentRun,
     AnalysisRun,
     Department,
     Initiative,
@@ -39,7 +40,9 @@ from app.infrastructure.models import (
     now,
     utc,
 )
+from app.modules.decisions.arrangements import confirmed_arrangement
 from app.modules.intelligence.provider import get_provider
+from app.modules.intelligence.signals import refresh_work
 from app.modules.organizations.api import Limit, Offset
 from app.modules.work_items.service import append_update, ensure_version, replay, request_hash
 
@@ -75,6 +78,8 @@ def create_work(payload: WorkInput, db: Db, actor: Actor) -> WorkOut:
             request_hash=request_hash(payload.model_dump(mode="json")),
         )
     )
+    db.flush()
+    refresh_work(db, work)
     audit(db, actor, "work.created", work.id)
     db.commit()
     return WorkOut.model_validate(work)
@@ -129,6 +134,7 @@ def assign(work_id: str, payload: AssignmentInput, db: Db, actor: Actor) -> Even
     )
     db.add(event)
     db.flush()
+    refresh_work(db, work)
     audit(db, actor, "work.assigned", event.id)
     db.commit()
     return EventOut.model_validate(event)
@@ -189,36 +195,46 @@ def create_draft(payload: DraftInput, db: Db, actor: Actor) -> DraftOut:
     ensure_version(work, work.version)
     if work.lifecycle_status in {"done", "cancelled"}:
         fail("terminal_work", "已结束事项不能继续更新", 409)
+    if payload.decision_id:
+        confirmed_arrangement(db, actor, work.id, payload.decision_id)
+        if not payload.raw_text.strip():
+            fail("empty_feedback", "请写下实际反馈")
     provider = get_provider()
     started = perf_counter()
-    proposed = ProposedFields.model_validate(provider.propose(payload.raw_text))
+    proposed = (
+        ProposedFields(summary=payload.raw_text.strip())
+        if payload.decision_id
+        else ProposedFields.model_validate(provider.propose(payload.raw_text))
+    )
     latency = int((perf_counter() - started) * 1000)
     draft = UpdateDraft(
         organization_id=actor.organization_id,
         work_item_id=work.id,
+        decision_id=payload.decision_id,
         actor_id=actor.id,
         raw_text=payload.raw_text,
         proposed_fields=proposed.model_dump(),
         base_version=work.version,
-        provider=provider.name,
+        provider="manual_feedback" if payload.decision_id else provider.name,
         expires_at=now() + timedelta(hours=24),
     )
     db.add(draft)
     db.flush()
-    db.add(
-        AnalysisRun(
-            organization_id=actor.organization_id,
-            draft_id=draft.id,
-            purpose="update_draft",
-            provider=provider.name,
-            model=provider.model,
-            prompt_version=provider.prompt_version,
-            input_evidence_ids=[f"draft:{draft.id}", f"work:{work.id}:v{work.version}"],
-            output_schema_version="proposed-fields-v1",
-            latency_ms=latency,
-            status="rules_fallback",
+    if not payload.decision_id:
+        db.add(
+            AnalysisRun(
+                organization_id=actor.organization_id,
+                draft_id=draft.id,
+                purpose="update_draft",
+                provider=provider.name,
+                model=provider.model,
+                prompt_version=provider.prompt_version,
+                input_evidence_ids=[f"draft:{draft.id}", f"work:{work.id}:v{work.version}"],
+                output_schema_version="proposed-fields-v1",
+                latency_ms=latency,
+                status="rules_fallback",
+            )
         )
-    )
     db.commit()
     return DraftOut.model_validate(draft)
 
@@ -237,6 +253,8 @@ def owned_draft(db: Db, actor: Actor, draft_id: str) -> UpdateDraft:
         fail("not_found", "未找到此草稿", 404)
     assert draft is not None
     get_work(db, actor, draft.work_item_id)
+    if draft.decision_id:
+        confirmed_arrangement(db, actor, draft.work_item_id, draft.decision_id)
     return draft
 
 
@@ -252,14 +270,61 @@ def edit_draft(draft_id: str, payload: DraftEdit, db: Db, actor: Actor) -> Draft
         fail("draft_closed", "草稿已确认或已过期", 409)
     if draft.revision != payload.expected_revision:
         fail("stale_draft", "草稿已变化，请重新查看", 409)
+    if draft.decision_id:
+        feedback_fields(payload.proposed_fields)
     draft.proposed_fields = payload.proposed_fields.model_dump()
     # SQLAlchemy detects real changes; identical edits safely preserve the revision.
     db.commit()
+    run = db.scalar(
+        select(AgentRun).where(
+            AgentRun.organization_id == actor.organization_id,
+            AgentRun.draft_id == draft.id,
+            AgentRun.actor_id == actor.id,
+        )
+    )
+    if run:
+        from app.modules.agent.approvals import wait_for_review
+
+        db.commit()
+        wait_for_review(run, "draft", draft.id, draft.revision)
     return DraftOut.model_validate(draft)
 
 
 @router.post("/work-updates/drafts/{draft_id}/confirm", response_model=EventOut)
 def confirm(draft_id: str, payload: ConfirmInput, db: Db, actor: Actor) -> EventOut:
+    run = db.scalar(
+        select(AgentRun).where(
+            AgentRun.organization_id == actor.organization_id,
+            AgentRun.draft_id == draft_id,
+            AgentRun.actor_id == actor.id,
+        )
+    )
+    if run is None:
+        return confirm_domain(draft_id, payload, db, actor)
+    from app.modules.agent.approvals import review
+    from app.modules.agent.runtime import authorize
+
+    authorize(db, actor, run.session_hash)
+    owned_draft(db, actor, draft_id)
+    db.commit()  # Do not hold domain row locks while the checkpoint store writes.
+
+    def apply() -> EventOut:
+        authorize(db, actor, run.session_hash)
+        return confirm_domain(draft_id, payload, db, actor)
+
+    result = review(
+        run,
+        "draft",
+        draft_id,
+        payload.expected_revision,
+        fingerprint=request_hash(payload.model_dump()),
+        apply=apply,
+    )
+    assert result is not None
+    return result
+
+
+def confirm_domain(draft_id: str, payload: ConfirmInput, db: Db, actor: Actor) -> EventOut:
     draft = owned_draft(db, actor, draft_id)
     body = {"draft_id": draft_id, **payload.model_dump()}
     existing = replay(db, actor, f"draft:{draft_id}", body)
@@ -270,18 +335,35 @@ def confirm(draft_id: str, payload: ConfirmInput, db: Db, actor: Actor) -> Event
     if draft.revision != payload.expected_revision:
         fail("stale_draft", "草稿已变化，请重新查看", 409)
     work = get_work(db, actor, draft.work_item_id, lock=True)
+    db.refresh(work)
     ensure_version(work, draft.base_version)
+    fields = ProposedFields.model_validate(draft.proposed_fields)
+    if draft.decision_id:
+        confirmed_arrangement(db, actor, work.id, draft.decision_id)
+        feedback_fields(fields)
     event = append_update(
         db,
         actor,
         work,
-        ProposedFields.model_validate(draft.proposed_fields),
+        fields,
         f"draft:{draft_id}",
         body,
-        "update.confirmed",
+        "decision.feedback" if draft.decision_id else "update.confirmed",
         draft_id,
-        {"raw_text": draft.raw_text, "provider": draft.provider, "draft_revision": draft.revision},
+        {
+            "raw_text": draft.raw_text,
+            "provider": draft.provider,
+            "draft_revision": draft.revision,
+            **({"decision_id": draft.decision_id} if draft.decision_id else {}),
+        },
     )
     draft.state = "confirmed"
     db.commit()
     return EventOut.model_validate(event)
+
+
+def feedback_fields(fields: ProposedFields) -> None:
+    if fields.lifecycle_status is not None or fields.needs_support is not None:
+        fail("feedback_state_change", "安排反馈只记录实际情况；如需变更状态，请单独更新工作", 422)
+    if not fields.summary.strip():
+        fail("empty_feedback", "请写下实际反馈")

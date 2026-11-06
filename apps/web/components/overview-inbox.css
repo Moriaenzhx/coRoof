@@ -1,0 +1,342 @@
+:is(.app-shell .overview-priority-inbox, .overview-priority-inbox) {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  min-width: 0;
+}
+.overview-priority-inbox .overview-inbox-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  padding-bottom: 16px;
+}
+.overview-priority-inbox .overview-inbox-heading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.overview-priority-inbox .overview-inbox-heading h2 > span {
+  display: inline-block;
+  margin-left: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.overview-priority-inbox .overview-inbox-heading p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+:is(.app-shell .overview-priority-inbox, .overview-priority-inbox)
+  .overview-inbox-manage {
+  padding: 6px 0 6px 8px;
+  min-height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.overview-priority-inbox .overview-priority-list {
+  border-top: 1px solid var(--line);
+}
+:is(.app-shell .overview-priority-inbox, .overview-priority-inbox)
+  .overview-inbox-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 14px 18px;
+  padding: 16px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.overview-priority-list .overview-inbox-row + .overview-inbox-row {
+  border-top: 1px solid var(--line);
+}
+.overview-priority-number {
+  padding-top: 2px;
+  color: #8e98ab;
+  font-size: 21px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.overview-priority-row:first-child .overview-priority-number {
+  color: var(--accent);
+}
+.overview-priority-inbox .overview-inbox-row-main {
+  min-width: 0;
+}
+.overview-priority-inbox .overview-inbox-row-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px 12px;
+}
+.overview-priority-inbox .overview-inbox-row h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.overview-priority-inbox .overview-inbox-kind {
+  padding: 3px 7px;
+  border-radius: 5px;
+  background: #f6f0e4;
+  color: #805b24;
+  font-size: 12px;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+.overview-priority-inbox .overview-inbox-kind[data-review] {
+  background: #edf1f8;
+  color: #40567c;
+}
+.overview-priority-inbox .overview-inbox-explanation {
+  margin: 7px 0 9px;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.overview-priority-inbox .overview-inbox-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 15px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+  flex: 1 1 310px;
+}
+.overview-priority-context {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 16px;
+}
+.overview-priority-owner {
+  color: var(--ink);
+  font-weight: 500;
+}
+.overview-priority-support[data-support] {
+  color: var(--amber);
+}
+.overview-priority-inbox .overview-inbox-row-actions {
+  padding-top: 2px;
+  display: flex;
+  justify-content: flex-end;
+  min-width: 116px;
+  max-width: 190px;
+}
+:is(.app-shell .overview-priority-inbox, .overview-priority-inbox)
+  .overview-inbox-row-actions
+  > button {
+  min-height: 44px;
+  padding: 10px 15px;
+  border: 1px solid #dce1eb;
+  border-radius: 9px;
+  background: #f6f7fa;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 500;
+}
+:is(.app-shell .overview-priority-inbox, .overview-priority-inbox)
+  .overview-priority-row:first-child
+  .overview-inbox-row-actions
+  > button {
+  color: white;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.overview-priority-inbox .overview-inbox-trace {
+  margin: 0;
+}
+.overview-priority-context .overview-inbox-trace:has(details[open]) {
+  flex-basis: 100%;
+}
+.overview-priority-inbox .overview-inbox-evidence {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.overview-priority-inbox .overview-inbox-evidence summary {
+  cursor: pointer;
+  padding: 7px 0;
+  width: fit-content;
+  font-size: 13px;
+}
+.overview-priority-inbox .overview-inbox-evidence[open] {
+  margin-top: 6px;
+  padding: 0 0 8px;
+}
+.overview-priority-inbox .overview-inbox-sources {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin: 6px 0;
+  font-size: 13px;
+}
+.overview-priority-inbox .overview-inbox-sources > span {
+  border: 0;
+  padding: 0;
+}
+.overview-priority-inbox .overview-inbox-sources small,
+.overview-priority-inbox .overview-inbox-evidence p {
+  font-size: 13px;
+}
+.overview-priority-inbox .overview-inbox-evidence ul {
+  margin: 7px 0;
+  padding-left: 18px;
+}
+.overview-priority-inbox .overview-inbox-evidence li + li {
+  margin-top: 7px;
+}
+.overview-priority-inbox .overview-inbox-evidence button {
+  min-height: 40px;
+  margin: 2px 6px;
+  padding: 7px 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 13px;
+}
+:is(.app-shell .overview-priority-inbox, .overview-priority-inbox)
+  .overview-inbox-secondary-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-left: 52px;
+  padding: 15px 0;
+}
+.overview-priority-inbox .overview-inbox-secondary-row h3 {
+  font-size: 16px;
+}
+.overview-priority-inbox
+  .overview-inbox-secondary-row
+  .overview-inbox-explanation {
+  font-size: 14px;
+  margin: 5px 0;
+}
+:is(.app-shell .overview-priority-inbox, .overview-priority-inbox)
+  .overview-inbox-expand {
+  width: auto;
+  margin: 4px 0 0 52px;
+  padding: 9px 0;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 14px;
+}
+.overview-priority-inbox .overview-inbox-empty {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 17px 0;
+  color: var(--muted);
+}
+.overview-inbox-empty > svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.overview-priority-inbox .overview-inbox-empty p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.overview-priority-inbox .overview-inbox-empty span {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+}
+.overview-priority-inbox .overview-inbox-watch-status {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.overview-inbox-watch-status summary {
+  cursor: pointer;
+  min-height: 40px;
+  padding: 8px 0;
+}
+.overview-inbox-watch-status details > span {
+  display: block;
+  padding: 4px 0;
+}
+.overview-priority-inbox .overview-inbox-watch-status button {
+  min-height: 40px;
+  padding: 6px;
+  border: 0;
+  background: transparent;
+  font-size: 13px;
+  color: var(--accent);
+}
+@media (max-width: 700px) {
+  .overview-priority-inbox .overview-inbox-heading {
+    gap: 12px;
+  }
+  .overview-priority-inbox .overview-inbox-heading h2 {
+    font-size: 20px;
+  }
+  .overview-priority-inbox .overview-inbox-heading h2 > span {
+    display: block;
+    margin: 5px 0 0;
+  }
+  :is(.app-shell .overview-priority-inbox, .overview-priority-inbox)
+    .overview-inbox-row {
+    grid-template-columns: 25px minmax(0, 1fr);
+    gap: 8px 11px;
+    padding: 18px 0;
+  }
+  .overview-priority-number {
+    font-size: 17px;
+  }
+  .overview-priority-inbox .overview-inbox-row-actions {
+    grid-column: 2;
+    justify-content: flex-start;
+    max-width: none;
+    padding-top: 0;
+  }
+  :is(.app-shell .overview-priority-inbox, .overview-priority-inbox)
+    .overview-inbox-secondary-row {
+    grid-template-columns: minmax(0, 1fr);
+    margin-left: 36px;
+    gap: 6px;
+  }
+  .overview-priority-inbox
+    .overview-inbox-secondary-row
+    .overview-inbox-row-actions {
+    grid-column: 1;
+  }
+  :is(.app-shell .overview-priority-inbox, .overview-priority-inbox)
+    .overview-inbox-expand {
+    margin-left: 36px;
+  }
+  .overview-priority-inbox .overview-inbox-evidence summary,
+  .overview-priority-inbox .overview-inbox-evidence button,
+  .overview-priority-inbox .overview-inbox-watch-status button,
+  .overview-priority-inbox .overview-inbox-manage,
+  .overview-inbox-watch-status summary {
+    min-height: 44px;
+  }
+}

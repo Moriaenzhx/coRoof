@@ -1,0 +1,417 @@
+:is(.app-shell .my-work-focus-board, .my-work-focus-board) {
+  min-width: 0;
+}
+.my-work-focus-board .my-work-start-heading {
+  margin-bottom: 20px;
+}
+.my-work-focus-board .my-work-start-heading h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.my-work-focus-board .my-work-summary {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.my-work-summary strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.my-work-start-heading > small {
+  display: block;
+  margin-top: 5px;
+  font-size: 13px;
+  color: var(--muted);
+}
+:is(.app-shell .my-work-focus-board, .my-work-focus-board) .my-work-task {
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 19px 0;
+}
+:is(.app-shell .my-work-focus-board, .my-work-focus-board) .my-work-priority {
+  padding: 22px 24px;
+  border-left: 3px solid var(--accent);
+  background: #f5f6f9;
+  border-radius: 0 14px 14px 0;
+}
+.my-work-priority-intro {
+  margin-bottom: 18px;
+}
+.my-work-priority-intro > span {
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+.my-work-priority-intro p {
+  margin: 5px 0 0;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.65;
+}
+.my-work-task-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 18px 28px;
+}
+.my-work-task-main {
+  min-width: 0;
+}
+.my-work-task-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+.my-work-task-title h3 {
+  margin: 0;
+  max-width: 100%;
+}
+:is(.app-shell .my-work-focus-board, .my-work-focus-board) .my-work-title {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  min-height: 30px;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 600;
+  text-align: left;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  justify-content: flex-start;
+}
+:is(.app-shell .my-work-focus-board, .my-work-focus-board)
+  .my-work-priority
+  .my-work-title {
+  font-size: 20px;
+}
+.my-work-title svg {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.my-work-support-note {
+  font-size: 13px;
+  color: var(--muted);
+}
+.my-work-task-context,
+.my-work-task-date {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px 16px;
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.my-work-task-context > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.my-work-task-context svg,
+.my-work-task-date > svg {
+  flex-shrink: 0;
+}
+.my-work-task-context .my-work-owner {
+  color: var(--text);
+}
+.my-work-task-date {
+  gap: 5px 8px;
+  color: var(--text);
+}
+.my-work-task-date strong {
+  margin-left: 6px;
+  color: var(--amber);
+  font-size: 13px;
+  font-weight: 500;
+}
+:is(.app-shell .my-work-focus-board, .my-work-focus-board)
+  .my-work-arrangement {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 9px;
+  margin: 11px 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.my-work-focus-board .my-work-arrangement > span {
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.my-work-focus-board .my-work-arrangement p {
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.my-work-task-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  min-width: 112px;
+  max-width: 240px;
+}
+:is(.app-shell .my-work-focus-board, .my-work-focus-board)
+  .my-work-task-actions
+  > button {
+  min-height: 44px;
+  padding: 10px 15px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 500;
+}
+:is(.app-shell .my-work-focus-board, .my-work-focus-board)
+  .my-work-task-actions
+  > .my-work-report {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+}
+:is(.app-shell .my-work-focus-board, .my-work-focus-board)
+  .my-work-compact
+  .my-work-report {
+  color: var(--accent);
+  border-color: #dce1eb;
+  background: #f6f7fa;
+}
+.my-work-focus-board .my-work-more {
+  color: var(--muted);
+  font-size: 13px;
+  max-width: 100%;
+}
+.my-work-focus-board .my-work-more > summary {
+  cursor: pointer;
+  padding: 10px 2px;
+  min-height: 40px;
+  text-align: right;
+}
+.my-work-more-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 6px 0;
+}
+.my-work-more-content p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.my-work-more-content button {
+  min-height: 40px;
+  font-size: 13px;
+}
+.my-work-focus-board .my-work-readonly {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.my-work-rest-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 300px);
+  align-items: center;
+  gap: 14px 20px;
+  margin-top: 30px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.my-work-rest-label {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+.my-work-rest-label h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+.my-work-rest-label span {
+  color: var(--muted);
+  font-size: 13px;
+}
+.my-work-focus-board .my-work-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 8px 12px;
+  color: var(--muted);
+  min-width: 0;
+  background: white;
+}
+.my-work-search label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+:is(.app-shell .my-work-focus-board, .my-work-focus-board)
+  .my-work-search
+  input {
+  min-width: 0;
+  width: 100%;
+  min-height: 26px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 15px;
+  line-height: 26px;
+  box-shadow: none;
+  outline: none;
+}
+.my-work-search:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.my-work-focus-board .my-work-filters {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+:is(.app-shell .my-work-focus-board, .my-work-focus-board)
+  .my-work-filters
+  button {
+  display: inline-flex;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+}
+:is(.app-shell .my-work-focus-board, .my-work-focus-board)
+  .my-work-filters
+  button[aria-pressed="true"] {
+  color: var(--accent);
+  background: #eef1f7;
+  border-color: #e1e6ef;
+  font-weight: 600;
+}
+.my-work-filters span {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.my-work-compact-list > .my-work-task + .my-work-task {
+  border-top: 1px solid var(--line);
+}
+.my-work-empty,
+.my-work-rest-empty {
+  padding: 22px 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.my-work-empty h3 {
+  margin: 0 0 6px;
+  color: var(--text);
+  font-size: 16px;
+}
+.my-work-empty p,
+.my-work-rest-empty {
+  margin: 0;
+}
+.my-work-arrangement-error {
+  color: var(--danger);
+  font-size: 13px;
+}
+.my-work-arrangement-error button {
+  margin-left: 6px;
+  border: 0;
+  background: transparent;
+  min-height: 40px;
+  font-size: 13px;
+}
+@media (max-width: 700px) {
+  :is(.app-shell .my-work-focus-board, .my-work-focus-board) .my-work-priority {
+    padding: 17px 16px;
+  }
+  .my-work-task-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .my-work-priority .my-work-task-main {
+    display: contents;
+  }
+  .my-work-priority .my-work-task-title {
+    order: 0;
+  }
+  .my-work-priority .my-work-task-actions {
+    order: 1;
+  }
+  .my-work-priority .my-work-task-context {
+    order: 2;
+  }
+  .my-work-priority .my-work-task-date {
+    order: 3;
+  }
+  .my-work-priority .my-work-arrangement {
+    order: 4;
+  }
+  .my-work-task-actions {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    max-width: 100%;
+    gap: 8px 14px;
+  }
+  .my-work-focus-board .my-work-more > summary {
+    min-height: 44px;
+  }
+  .my-work-more[open] {
+    flex-basis: 100%;
+  }
+  .my-work-rest-heading {
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 24px;
+  }
+  .my-work-rest-label {
+    justify-content: space-between;
+  }
+  :is(.app-shell .my-work-focus-board, .my-work-focus-board)
+    .my-work-search
+    input {
+    font-size: 16px;
+  }
+  :is(.app-shell .my-work-focus-board, .my-work-focus-board)
+    .my-work-filters
+    button {
+    min-height: 44px;
+  }
+  .my-work-task-context {
+    gap: 5px 12px;
+  }
+  :is(.app-shell .my-work-focus-board, .my-work-focus-board) .my-work-title,
+  .my-work-more-content button,
+  .my-work-arrangement-error button {
+    min-height: 44px;
+  }
+}

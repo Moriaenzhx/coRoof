@@ -12,6 +12,9 @@ import httpx
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--base-url", default="http://localhost:3000")
 parser.add_argument("--label", default=uuid4().hex[:8])
+parser.add_argument(
+    "--slice02", action="store_true", help="Also verify evidence, decisions and outcomes"
+)
 args = parser.parse_args()
 base = args.base_url.rstrip("/") + "/api/v1"
 
@@ -90,6 +93,48 @@ dashboard = boss.get("/dashboard").raise_for_status().json()
 assert dashboard["support_work"] == 1
 assert sum(d["coverage"] == "unknown" for d in dashboard["departments"]) == 2
 assert boss.get(f"/work-items/{work['id']}/events").json()["total"] == 2
+slice02 = None
+if args.slice02:
+    signals = boss.get("/signals").raise_for_status().json()["items"]
+    assert any(s["category"] == "support" for s in signals)
+    answer = post(
+        boss, "/ai/ask", {"question": "这项工作需要怎样跟进？", "work_item_id": work["id"]}
+    )
+    evidence = boss.get("/evidence/" + answer["evidence"][0]["id"]).raise_for_status().json()
+    assert evidence["event_id"] == event["id"] and evidence["facts"]["needs_support"]
+    decision = post(
+        boss,
+        "/decisions",
+        {"analysis_id": answer["id"], "work_item_id": work["id"], "idempotency_key": str(uuid4())},
+    )
+    assert decision["state"] == "pending"
+    confirm = {
+        "expected_version": decision["version"],
+        "selected_option": decision["options"][0]["id"],
+        "selected_plan": "验收：与负责人核实资料到位情况",
+        "follow_up": "验收：核实后追加实际结果",
+    }
+    path = f"/decisions/{decision['id']}/confirm"
+    assert employee.post(path, json=confirm).status_code == 403
+    first = post(boss, path, confirm)
+    assert first == post(boss, path, confirm)
+    outcome = {
+        "observed_result": "验收：已核实仍缺资料，尚未解除支持需求",
+        "evidence_refs": [evidence["id"]],
+        "idempotency_key": str(uuid4()),
+    }
+    path = f"/decisions/{decision['id']}/outcomes"
+    recorded = post(boss, path, outcome)
+    assert recorded["id"] == post(boss, path, outcome)["id"]
+    assert boss.get(path).raise_for_status().json()["total"] == 1
+    assert boss.get(f"/work-items/{work['id']}").raise_for_status().json()["needs_support"]
+    assert boss.get(f"/work-items/{work['id']}/events").raise_for_status().json()["total"] == 4
+    slice02 = {
+        "analysis_mode": answer["mode"],
+        "decision_id": decision["id"],
+        "outcome_id": recorded["id"],
+        "duplicate_decision_confirmation": "one event",
+    }
 print(
     json.dumps(
         {
@@ -101,6 +146,7 @@ print(
             "work_id": work["id"],
             "event_id": event["id"],
             "duplicate_confirmation": "one event",
+            "slice02": slice02,
         },
         ensure_ascii=False,
         indent=2,

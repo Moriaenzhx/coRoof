@@ -30,6 +30,10 @@ def dashboard(db: Db, actor: Actor) -> DashboardOut:
     return DashboardOut(
         organization=OrgOut.model_validate(db.get(Organization, actor.organization_id)),
         departments=summaries,
+        source="mixed" if any(w.source_authority == "external" for w in works) else "native",
+        external_data="partial"
+        if any(w.source_authority == "external" for w in works)
+        else "not_connected",
         total_work=len(works),
         active_work=sum(w.lifecycle_status in {"planned", "in_progress"} for w in works),
         completed_work=sum(w.lifecycle_status == "done" for w in works),

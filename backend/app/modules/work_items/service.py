@@ -9,6 +9,7 @@ from app.core.access import audit
 from app.core.errors import fail
 from app.core.schemas import ProposedFields
 from app.infrastructure.models import Membership, WorkEvent, WorkItem, now
+from app.modules.intelligence.signals import refresh_work
 
 
 def request_hash(payload: dict[str, Any]) -> str:
@@ -76,5 +77,6 @@ def append_update(
     )
     db.add(event)
     db.flush()
+    refresh_work(db, work)
     audit(db, actor, event_type, event.id)
     return event

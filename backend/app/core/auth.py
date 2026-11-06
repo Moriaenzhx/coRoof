@@ -4,7 +4,7 @@ from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Cookie, Depends, Header, Request, Response
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -20,6 +20,7 @@ from app.infrastructure.models import (
     now,
     utc,
 )
+from app.modules.identity.sessions import issue, valid_session
 
 Db = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/auth", tags=["identity"])
@@ -37,8 +38,8 @@ def current_user(
     if request.method not in {"GET", "HEAD", "OPTIONS"}:
         if request.headers.get("X-CoRoof-Request") != "1":
             fail("csrf_required", "缺少请求校验头", 403)
-    session = db.get(AuthSession, token_hash(coroof_session or ""))
-    if session is None or utc(session.expires_at) <= now():
+    session = valid_session(db, token_hash(coroof_session or ""))
+    if session is None:
         fail("unauthenticated", "请先验证身份", 401)
     assert session is not None
     user = db.get(Identity, session.user_id)
@@ -86,6 +87,8 @@ def member_out(db: Session, member: Membership) -> MemberOut:
 
 @router.post("/request-link", response_model=MockDelivery)
 def request_link(payload: LoginInput, db: Db) -> MockDelivery:
+    if settings().auth_mode != "mock" or settings().environment == "production":
+        fail("mock_disabled", "当前已禁用开发验证", 404)
     token = secrets.token_urlsafe(32)
     expires_at = now() + timedelta(minutes=10)
     db.add(
@@ -101,7 +104,9 @@ def request_link(payload: LoginInput, db: Db) -> MockDelivery:
 
 
 @router.post("/verify", response_model=MeOut)
-def verify(payload: TokenInput, db: Db, response: Response) -> MeOut:
+def verify(payload: TokenInput, db: Db, response: Response, request: Request) -> MeOut:
+    if settings().auth_mode != "mock" or settings().environment == "production":
+        fail("mock_disabled", "当前已禁用开发验证", 404)
     challenge = db.scalar(
         select(LoginChallenge)
         .where(
@@ -118,24 +123,9 @@ def verify(payload: TokenInput, db: Db, response: Response) -> MeOut:
         user = Identity(verified_identity=challenge.email, name=challenge.name)
         db.add(user)
         db.flush()
-    token = secrets.token_urlsafe(32)
-    db.add(
-        AuthSession(
-            token_hash=token_hash(token),
-            user_id=user.id,
-            expires_at=now() + timedelta(hours=24),
-        )
-    )
-    db.commit()
-    response.set_cookie(
-        "coroof_session",
-        token,
-        httponly=True,
-        secure=settings().cookie_secure,
-        samesite="strict",
-        max_age=86400,
-        path="/",
-    )
+    if user.identity_provider != "mock":
+        fail("identity_mismatch", "正式身份不能通过开发链接登录", 403)
+    issue(db, user, response, previous_hash=token_hash(request.cookies.get("coroof_session", "")))
     return me(db, user)
 
 
@@ -151,6 +141,7 @@ def me(db: Db, user: User) -> MeOut:
         id=user.id,
         name=user.name,
         email=user.verified_identity,
+        mode=user.identity_provider,
         memberships=[
             {
                 "membership": member_out(db, m),
@@ -167,4 +158,11 @@ def logout(db: Db, user: User, request: Request, response: Response) -> None:
     if session:
         db.delete(session)
         db.commit()
+    response.delete_cookie("coroof_session", path="/")
+
+
+@router.post("/logout-all", status_code=204)
+def logout_all(db: Db, user: User, response: Response) -> None:
+    db.execute(delete(AuthSession).where(AuthSession.user_id == user.id))
+    db.commit()
     response.delete_cookie("coroof_session", path="/")

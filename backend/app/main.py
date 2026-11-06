@@ -13,11 +13,23 @@ from starlette.responses import Response
 from app.core.auth import Db
 from app.core.auth import router as auth_router
 from app.core.config import settings
+from app.core.deployment import issues
 from app.core.schemas import ErrorResponse, HealthOut, RuntimeInfo
+from app.modules.agent.api import router as agent_router
+from app.modules.ai_admin.usage import router as ai_admin_router
+from app.modules.connectors.api import router as connectors_router
+from app.modules.decisions.api import router as decisions_router
+from app.modules.identity.oidc import OIDCSessionMiddleware
+from app.modules.identity.oidc import router as oidc_router
 from app.modules.initiatives.api import router as initiatives_router
+from app.modules.intelligence.api import router as intelligence_router
+from app.modules.knowledge.api import router as knowledge_router
 from app.modules.members.api import router as members_router
+from app.modules.memory.api import router as memory_router
 from app.modules.organizations.api import router as organizations_router
 from app.modules.organizations.dashboard import router as dashboard_router
+from app.modules.watch import events as watch_events  # noqa: F401
+from app.modules.watch.api import router as watch_router
 from app.modules.work_items.api import router as work_router
 
 
@@ -28,6 +40,11 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="coRoof V1", version="0.1.0", lifespan=lifespan)
+app.add_middleware(OIDCSessionMiddleware)
+app.include_router(oidc_router, prefix="/api/v1")
+app.include_router(watch_router, prefix="/api/v1")
+app.include_router(knowledge_router, prefix="/api/v1")
+app.include_router(memory_router, prefix="/api/v1")
 
 
 @app.middleware("http")
@@ -52,6 +69,7 @@ async def request_boundary(
     response = await call_next(request)
     response.headers["Cache-Control"] = "no-store"
     response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "no-referrer"
     return response
 
 
@@ -130,7 +148,7 @@ def health() -> HealthOut:
 @app.get("/readyz", response_model=HealthOut)
 def ready(db: Db) -> HealthOut:
     version = db.execute(text("SELECT version_num FROM alembic_version")).scalar()
-    if version != "0001_slice01":
+    if version != "0019_arrangement_feedback":
         raise HTTPException(
             503, detail={"code": "migration_required", "message": "请执行数据库迁移"}
         )
@@ -143,6 +161,7 @@ def runtime() -> RuntimeInfo:
         environment=settings().environment,
         auth_mode=settings().auth_mode,
         analysis_mode=settings().ai_provider,
+        production_ready=settings().environment == "production" and not issues(settings()),
         deployment_prerequisites=["正式身份验证与邮件发送", "HTTPS 与安全会话", "密钥管理与备份"],
     )
 
@@ -154,6 +173,11 @@ for router in (
     initiatives_router,
     work_router,
     dashboard_router,
+    intelligence_router,
+    decisions_router,
+    ai_admin_router,
+    agent_router,
+    connectors_router,
 ):
     app.include_router(
         router,

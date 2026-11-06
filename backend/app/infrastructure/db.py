@@ -8,6 +8,16 @@ from app.core.config import settings
 
 
 def make_engine(url: str) -> Engine:
+    # API, Worker and command-line entry points share the same metadata registry.
+    # Composite references must resolve even when an entry point imports only a
+    # subset of the business services. This registers models, never creates tables.
+    from app.modules.agent import models as agent_models  # noqa: F401
+    from app.modules.connectors import models as connector_models  # noqa: F401
+    from app.modules.identity import models as identity_models  # noqa: F401
+    from app.modules.knowledge import models as knowledge_models  # noqa: F401
+    from app.modules.memory import models as memory_models  # noqa: F401
+    from app.modules.watch import models as watch_models  # noqa: F401
+
     engine = create_engine(url, pool_pre_ping=True)
     if url.startswith("sqlite"):
 

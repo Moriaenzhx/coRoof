@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Copy, Plus } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Copy, Plus, RefreshCw } from "lucide-react";
+import { Feedback } from "./status";
 import {
   api,
   unwrap,
@@ -18,12 +19,14 @@ export function Setup({
   initiatives,
   members,
   onUpdated,
+  authMode = "mock",
 }: {
   context: MembershipContext;
   departments: Department[];
   initiatives: Initiative[];
   members: Member[];
   onUpdated: () => Promise<void>;
+  authMode?: "mock" | "oidc";
 }) {
   const owner = context.membership.roles.includes("owner");
   const [tab, setTab] = useState(owner ? "department" : "work");
@@ -37,6 +40,11 @@ export function Setup({
     null,
   );
   const [invites, setInvites] = useState<Schemas["InviteOut"][]>([]);
+  const [retrying, setRetrying] = useState<string | null>(null);
+  const inviteRequest = useRef<{ fingerprint: string; key: string } | null>(
+    null,
+  );
+  const retries = useRef(new Map<string, string>());
   const header = { "x-organization-id": context.organization.id };
   const scopedDepartments = owner
     ? departments
@@ -79,18 +87,20 @@ export function Setup({
           }),
         );
       if (tab === "invite") {
+        const body: Schemas["InviteInput"] = {
+          email: value("email"),
+          department_id: departmentId,
+          roles:
+            value("role") === "manager" ? ["manager", "member"] : ["member"],
+        };
+        const fingerprint = JSON.stringify(body);
+        if (inviteRequest.current?.fingerprint !== fingerprint)
+          inviteRequest.current = { fingerprint, key: crypto.randomUUID() };
         setDelivery(
           unwrap(
             await api().POST("/api/v1/members/invitations", {
               params: { header },
-              body: {
-                email: value("email"),
-                department_id: departmentId,
-                roles:
-                  value("role") === "manager"
-                    ? ["manager", "member"]
-                    : ["member"],
-              },
+              body: { ...body, idempotency_key: inviteRequest.current.key },
             }),
           ),
         );
@@ -125,10 +135,9 @@ export function Setup({
         );
       await onUpdated();
       form.reset();
+      inviteRequest.current = null;
       setNotice(
-        tab === "invite"
-          ? "开发邀请已生成。请复制链接，使用受邀邮箱验证后加入。"
-          : "已保存。",
+        tab === "invite" ? "邀请已保存，请查看下方投递信息。" : "已保存。",
       );
     } catch (e) {
       setError(e instanceof Error ? e.message : "保存失败");
@@ -153,8 +162,35 @@ export function Setup({
       setBusy(false);
     }
   }
+  async function retry(invite: Schemas["InviteOut"]) {
+    if (!invite.delivery_status) return;
+    setBusy(true);
+    setError("");
+    const receipt = `${invite.id}:${invite.delivery_status.version}`;
+    if (!retries.current.has(receipt))
+      retries.current.set(receipt, crypto.randomUUID());
+    try {
+      unwrap(
+        await api().POST("/api/v1/members/invitations/{invitation_id}/retry", {
+          params: { header, path: { invitation_id: invite.id } },
+          body: {
+            expected_version: invite.delivery_status.version,
+            confirm: true,
+            idempotency_key: retries.current.get(receipt)!,
+          },
+        }),
+      );
+      setRetrying(null);
+      await loadInvites();
+      setNotice("已重新加入投递队列。");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "重试失败");
+    } finally {
+      setBusy(false);
+    }
+  }
   const link =
-    delivery && typeof window !== "undefined"
+    delivery?.delivery?.mode === "mock" && typeof window !== "undefined"
       ? `${window.location.origin}/#invite=${encodeURIComponent(delivery.delivery.token)}`
       : "";
   return (
@@ -188,16 +224,8 @@ export function Setup({
           </button>
         ))}
       </div>
-      {error && (
-        <p className="error" role="alert">
-          {error}
-        </p>
-      )}
-      {notice && (
-        <p className="success" role="status">
-          {notice}
-        </p>
-      )}
+      {error && <Feedback kind="error">{error}</Feedback>}
+      {notice && <Feedback kind="success">{notice}</Feedback>}
       <form key={tab} onSubmit={submit} className="setup-form">
         <h3>
           {
@@ -339,16 +367,23 @@ export function Setup({
           }
         >
           <Plus size={16} />
-          {busy ? "正在保存…" : tab === "invite" ? "生成开发邀请" : "保存"}
+          {busy
+            ? "正在保存…"
+            : tab === "invite"
+              ? authMode === "oidc"
+                ? "发送邀请"
+                : "生成开发邀请"
+              : "保存"}
         </button>
       </form>
       {tab === "invite" && (
         <>
           <p className="fine-print">
-            开发模拟邮件 · 未发送真实邮件。邀请 24
-            小时有效，只允许受邀邮箱加入。
+            {authMode === "oidc" || delivery?.delivery?.mode === "smtp"
+              ? "邀请 24 小时有效，仅受邀邮箱验证身份后可加入。邮件服务接受不等于收件箱送达。"
+              : "开发模拟邮件 · 未发送真实邮件。邀请 24 小时有效，只允许受邀邮箱加入。"}
           </p>
-          {delivery && (
+          {link && (
             <div className="invite-delivery">
               <label>
                 邀请链接
@@ -368,6 +403,12 @@ export function Setup({
             </div>
           )}
           <h3>邀请记录</h3>
+          <button
+            disabled={busy}
+            onClick={() => loadInvites().catch((e) => setError(e.message))}
+          >
+            <RefreshCw size={15} /> 刷新投递状态
+          </button>
           {invites.map((invite) => (
             <div className="invite-row" key={invite.id}>
               <div>
@@ -379,6 +420,38 @@ export function Setup({
                       ? "已加入"
                       : `有效期至 ${formatTime(invite.expires_at, context.organization.timezone)}`}
                 </small>
+                {invite.delivery_status && (
+                  <small>
+                    {deliveryLabels[invite.delivery_status.state]} · 已尝试{" "}
+                    {invite.delivery_status.attempts} 次
+                  </small>
+                )}
+                {invite.delivery_status &&
+                  ["failed", "unknown"].includes(
+                    invite.delivery_status.state,
+                  ) &&
+                  !invite.revoked &&
+                  !invite.accepted_at &&
+                  (retrying === invite.id ? (
+                    <div>
+                      <p className="fine-print">
+                        结果未知时可能已经发送。请先核对收件箱，确认需要再次投递。
+                      </p>
+                      <button disabled={busy} onClick={() => retry(invite)}>
+                        确认重试投递
+                      </button>
+                      <button disabled={busy} onClick={() => setRetrying(null)}>
+                        取消
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      disabled={busy}
+                      onClick={() => setRetrying(invite.id)}
+                    >
+                      核对后重试
+                    </button>
+                  ))}
               </div>
               {!invite.revoked && !invite.accepted_at && (
                 <button disabled={busy} onClick={() => revoke(invite.id)}>
@@ -393,3 +466,13 @@ export function Setup({
     </>
   );
 }
+
+const deliveryLabels: Record<Schemas["DeliveryStatus"]["state"], string> = {
+  queued: "等待投递",
+  sending: "投递中",
+  retry_wait: "等待重试",
+  accepted: "邮件服务已接受",
+  unknown: "投递结果未知",
+  failed: "投递失败",
+  cancelled: "投递已取消",
+};

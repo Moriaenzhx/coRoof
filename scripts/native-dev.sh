@@ -31,8 +31,10 @@ cd backend
 COROOF_CHILDREN="$COROOF_CHILDREN $!"
 .venv/bin/celery -A worker.app:celery worker --pool=solo --loglevel=WARNING > ../.local/worker.log 2>&1 &
 COROOF_CHILDREN="$COROOF_CHILDREN $!"
+.venv/bin/celery -A worker.app:celery beat --loglevel=WARNING --schedule=../.local/coroof-beat > ../.local/scheduler.log 2>&1 &
+COROOF_CHILDREN="$COROOF_CHILDREN $!"
 cd "$COROOF_ROOT/apps/web"
 node ../../node_modules/next/dist/bin/next dev --hostname 127.0.0.1 > ../../.local/web.log 2>&1 &
 COROOF_CHILDREN="$COROOF_CHILDREN $!"
-printf '\ncoRoof: http://localhost:3000\nLogs: .local/{api,worker,web,redis}.log\nCtrl+C stops only these child processes.\n'
+printf '\ncoRoof: http://localhost:3000\nLogs: .local/{api,worker,scheduler,web,redis}.log\nCtrl+C stops only these child processes.\n'
 wait

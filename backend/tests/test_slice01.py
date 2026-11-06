@@ -110,7 +110,16 @@ def test_member_cannot_list_peers_create_or_confirm_other_drafts(loop):
     )
     draft = boss.draft(work)
     employee.confirm(draft, 404)
-    employee.post("/decisions/example/confirm", {}, 404)  # Slice 02 is deliberately unavailable.
+    employee.post(
+        "/decisions/example/confirm",
+        {
+            "expected_version": 1,
+            "selected_option": "verify",
+            "selected_plan": "核实",
+            "follow_up": "跟进",
+        },
+        403,
+    )
     assert employee.get("/dashboard")["scope"] == "assigned"
 
 
@@ -258,7 +267,8 @@ def test_expired_draft_and_source_authority(loop):
     with session_factory()() as db:
         db.get(WorkItem, work["id"]).source_authority = "external"
         db.commit()
-    employee.post("/work-updates/drafts", {"work_item_id": work["id"], "raw_text": "完成"}, 409)
+    # External items without an active authorized SourceLink are no longer visible.
+    employee.post("/work-updates/drafts", {"work_item_id": work["id"], "raw_text": "完成"}, 404)
 
 
 def test_one_identity_multiple_organizations_no_implicit_access(loop):

@@ -1,0 +1,655 @@
+.app-shell .team-spaces {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+.app-shell .team-spaces button,
+.app-shell .team-spaces summary {
+  min-height: 44px;
+}
+.app-shell .team-spaces button:focus-visible,
+.app-shell .team-spaces summary:focus-visible {
+  outline: 2px solid #6c83a3;
+  outline-offset: 4px;
+}
+.app-shell .team-spaces svg {
+  flex-shrink: 0;
+}
+.app-shell .team-space-company {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 28px;
+  background: linear-gradient(115deg, #eef2f7, #f5f7fa 65%, #f8f9fb);
+  border: 1px solid #e5eaf0;
+  border-radius: 20px;
+}
+.app-shell .team-space-company-name,
+.app-shell .team-space-company-links,
+.app-shell .team-space-company-links button,
+.app-shell .team-space-card-heading,
+.app-shell .team-space-card-counts,
+.app-shell .team-space-card-footer,
+.app-shell .team-space-card-footer > span:last-child {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.app-shell .team-space-company-name {
+  min-width: 0;
+  gap: 16px;
+}
+.app-shell .team-space-company-name > div {
+  min-width: 0;
+}
+.app-shell .team-space-company-icon,
+.app-shell .team-space-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  background: #fff;
+  color: #42577a;
+}
+.app-shell .team-space-eyebrow {
+  display: block;
+  color: #647286;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  margin-bottom: 5px;
+}
+.app-shell .team-space-company h2 {
+  font-size: 17px;
+  line-height: 1.5;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+}
+.app-shell .team-space-company-links {
+  flex-shrink: 0;
+  gap: 8px;
+}
+.app-shell .team-space-company-links button {
+  padding: 10px 13px;
+  border: 1px solid #e1e7ef;
+  border-radius: 11px;
+  background: #ffffffb3;
+  color: #425472;
+  gap: 8px;
+  font-size: 12px;
+}
+.app-shell .team-space-company-links button:hover {
+  background: #fff;
+  border-color: #cbd5e1;
+}
+.app-shell .team-space-directory-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 8px;
+}
+.app-shell .team-space-directory-heading h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+.app-shell .team-space-search {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  width: min(240px, 100%);
+  margin: 0;
+  padding: 0 12px;
+  gap: 8px;
+  background: white;
+  border: 1px solid #dce2e8;
+  border-radius: 11px;
+  color: var(--muted);
+}
+.app-shell .team-space-search:focus-within {
+  outline: 2px solid #6c83a3;
+  outline-offset: 2px;
+}
+.app-shell .team-space-search input {
+  margin: 0;
+  padding: 12px 0;
+  min-width: 0;
+  width: 100%;
+  outline: none;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  font-size: 13px;
+  box-shadow: none;
+}
+.app-shell .team-space-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.app-shell .team-space-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
+  min-width: 0;
+  width: 100%;
+  padding: 25px 26px 20px;
+  border: 1px solid #e5eaf0;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.93);
+  color: var(--ink);
+  text-align: left;
+  box-shadow: 0 2px 8px #24335003;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+.app-shell .team-space-card:hover {
+  border-color: #b9c8dc;
+  box-shadow: 0 9px 24px #24335009;
+  transform: translateY(-2px);
+  background: #fff;
+}
+.app-shell .team-space-card-heading {
+  width: 100%;
+  min-width: 0;
+}
+.app-shell .team-space-card-heading strong {
+  font-size: 18px;
+  font-weight: 600;
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.app-shell .team-space-card-heading > svg {
+  color: #8894a4;
+}
+.app-shell .team-space-card-icon {
+  background: #eef2f9;
+  color: #536c95;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+}
+.app-shell .team-space-card[data-tone="1"] .team-space-card-icon {
+  background: #eef4f1;
+  color: #658579;
+}
+.app-shell .team-space-card[data-tone="2"] .team-space-card-icon {
+  background: #f5f0e9;
+  color: #a18764;
+}
+.app-shell .team-space-card[data-tone="3"] .team-space-card-icon {
+  background: #f0eef6;
+  color: #85749f;
+}
+.app-shell .team-space-card-counts {
+  margin: 18px 0 15px;
+  color: var(--muted);
+  font-size: 12px;
+  flex-wrap: wrap;
+  gap: 8px 17px;
+}
+.app-shell .team-space-card-priority {
+  display: grid;
+  gap: 7px;
+  padding: 14px 16px;
+  width: 100%;
+  min-width: 0;
+  min-height: 75px;
+  border-radius: 11px;
+  background: #f7f8fa;
+  margin-bottom: 19px;
+}
+.app-shell .team-space-card-priority[data-attention="true"] {
+  background: #fcf8f0;
+}
+.app-shell .team-space-priority-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.app-shell
+  .team-space-card-priority[data-attention="true"]
+  .team-space-priority-label {
+  color: #987129;
+}
+.app-shell .team-space-priority-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #495463;
+}
+.app-shell .team-space-card-footer {
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  margin-top: auto;
+  color: #67758b;
+  font-size: 11px;
+}
+.app-shell .team-space-card-footer > span:last-child {
+  gap: 4px;
+  flex-shrink: 0;
+}
+.app-shell .team-space-avatar-stack {
+  display: flex;
+  min-height: 30px;
+  align-items: center;
+  padding-left: 5px;
+}
+.app-shell .team-space-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #edf1f6;
+  color: #758296;
+  font-size: 13px;
+}
+.app-shell .team-space-avatar-stack .team-space-avatar {
+  width: 30px;
+  height: 30px;
+  margin-left: -5px;
+  border: 2px solid white;
+  font-size: 11px;
+}
+.app-shell .team-space-unassigned,
+.app-shell .team-space-finished {
+  border-top: 1px solid var(--line);
+}
+.app-shell .team-space-unassigned summary,
+.app-shell .team-space-finished summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 15px 2px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 13px;
+  color: var(--muted);
+}
+.app-shell .team-space-unassigned summary::-webkit-details-marker,
+.app-shell .team-space-finished summary::-webkit-details-marker {
+  display: none;
+}
+.app-shell .team-space-unassigned summary::after,
+.app-shell .team-space-finished summary::after {
+  display: none;
+}
+.app-shell .team-space-unassigned summary > svg:last-child,
+.app-shell .team-space-finished summary > svg:last-child {
+  margin-left: auto;
+  transition: transform 160ms ease;
+}
+.app-shell .team-space-unassigned[open] summary > svg:last-child,
+.app-shell .team-space-finished[open] summary > svg:last-child {
+  transform: rotate(90deg);
+}
+.app-shell .team-space-detail {
+  min-width: 0;
+  padding: 22px 28px 28px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #ffffffed;
+}
+.app-shell .team-space-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 7px 0 0;
+  margin: 0 0 12px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 12px;
+}
+.app-shell .team-space-back:hover {
+  color: var(--accent);
+}
+.app-shell .team-space-detail-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+.app-shell .team-space-detail-heading > div {
+  min-width: 0;
+}
+.app-shell .team-space-detail-heading h2 {
+  font-size: 25px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  outline: none;
+  overflow-wrap: anywhere;
+}
+.app-shell .team-space-detail-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.app-shell .team-space-library-link {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 13px;
+  border: 1px solid #e8ecf2;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #53657e;
+  font-size: 12px;
+  text-align: left;
+  flex-shrink: 0;
+}
+.app-shell .team-space-library-link small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.app-shell .team-space-tabs {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 22px;
+}
+.app-shell .team-space-tabs button {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: none;
+  color: var(--muted);
+  padding: 10px 2px 13px;
+  font-size: 14px;
+}
+.app-shell .team-space-tabs button[aria-pressed="true"] {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+.app-shell .team-space-section-heading {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.app-shell .team-space-section-heading h3,
+.app-shell .team-space-projects h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+.app-shell .team-space-section-heading > span {
+  color: var(--muted);
+  font-size: 11px;
+}
+.app-shell .team-space-work-list {
+  display: grid;
+}
+.app-shell .team-space-work-row {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  width: 100%;
+  gap: 15px;
+  padding: 18px 8px;
+  border: 0;
+  border-top: 1px solid #eff1f5;
+  border-radius: 0;
+  background: none;
+  text-align: left;
+}
+.app-shell .team-space-work-row:first-child {
+  border-top: 0;
+}
+.app-shell .team-space-work-row:hover,
+.app-shell .team-space-person:hover {
+  background: #f6f8fb;
+}
+.app-shell .team-space-work-copy {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  flex: 1;
+}
+.app-shell .team-space-work-copy strong {
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 1.65;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.app-shell .team-space-work-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 16px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.app-shell .team-space-work-row > svg {
+  color: #8b96a4;
+}
+.app-shell .team-space-work-row > .status-label {
+  flex-shrink: 0;
+}
+.app-shell .team-space-finished {
+  margin-top: 16px;
+}
+.app-shell .team-space-projects {
+  border-top: 1px solid var(--line);
+  padding-top: 22px;
+  margin-top: 20px;
+}
+.app-shell .team-space-projects > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 13px;
+}
+.app-shell .team-space-projects button {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  gap: 10px;
+  padding: 11px 13px;
+  border: 1px solid #e6ebf1;
+  border-radius: 10px;
+  background: #fafbfc;
+  font-size: 12px;
+  color: #576a85;
+  text-align: left;
+}
+.app-shell .team-space-projects button span {
+  overflow-wrap: anywhere;
+}
+.app-shell .team-space-members {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 24px;
+}
+.app-shell .team-space-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding: 14px 8px;
+  border: 0;
+  background: none;
+  border-radius: 10px;
+  text-align: left;
+}
+.app-shell .team-space-person-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  flex: 1;
+}
+.app-shell .team-space-person strong {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.app-shell .team-space-person small {
+  font-size: 11px;
+  color: var(--muted);
+}
+.app-shell .team-space-person > svg {
+  color: #8b96a4;
+}
+.app-shell .team-space-empty {
+  display: grid;
+  justify-items: center;
+  padding: 35px 20px;
+  text-align: center;
+  color: var(--muted);
+  line-height: 1.8;
+  font-size: 13px;
+}
+.app-shell .team-space-empty h3 {
+  font-weight: 500;
+  font-size: 15px;
+  color: #505e71;
+  margin: 13px 0 7px;
+}
+.app-shell .team-space-empty p {
+  margin: 0;
+  max-width: 360px;
+}
+.app-shell .team-space-empty button {
+  margin-top: 18px;
+  font-size: 12px;
+}
+@media (max-width: 1100px) {
+  .app-shell .team-space-company {
+    flex-wrap: wrap;
+    gap: 18px;
+  }
+}
+@media (max-width: 640px) {
+  .app-shell .team-spaces {
+    gap: 18px;
+  }
+  .app-shell .team-space-grid,
+  .app-shell .team-space-members {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .app-shell .team-space-company {
+    padding: 20px 18px;
+    border-radius: 16px;
+  }
+  .app-shell .team-space-company-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+  .app-shell .team-space-company-name {
+    gap: 12px;
+  }
+  .app-shell .team-space-company h2 {
+    font-size: 15px;
+  }
+  .app-shell .team-space-company-links {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .app-shell .team-space-company-links button {
+    flex: 1;
+    justify-content: center;
+    padding: 10px 9px;
+    font-size: 11px;
+  }
+  .app-shell .team-space-company-links button > svg:last-child {
+    display: none;
+  }
+  .app-shell .team-space-directory-heading {
+    flex-wrap: wrap;
+  }
+  .app-shell .team-space-search {
+    width: 100%;
+  }
+  .app-shell .team-space-card {
+    padding: 20px 20px 17px;
+    border-radius: 17px;
+  }
+  .app-shell .team-space-card-heading strong {
+    font-size: 17px;
+  }
+  .app-shell .team-space-card-priority {
+    min-height: 0;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  .app-shell .team-space-detail {
+    padding: 16px;
+    border-radius: 16px;
+  }
+  .app-shell .team-space-detail-heading {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .app-shell .team-space-library-link {
+    width: 100%;
+  }
+  .app-shell .team-space-library-link > span {
+    flex: 1;
+  }
+  .app-shell .team-space-detail-heading h2 {
+    font-size: 23px;
+  }
+  .app-shell .team-space-work-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 9px 10px;
+    padding: 16px 0;
+  }
+  .app-shell .team-space-work-row > .status-label {
+    justify-self: start;
+    grid-column: 1;
+  }
+  .app-shell .team-space-work-row > svg {
+    grid-column: 2;
+    grid-row: 1 / 3;
+  }
+  .app-shell .team-space-projects button {
+    width: 100%;
+  }
+  .app-shell .team-space-projects button span {
+    flex: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell .team-spaces button,
+  .app-shell .team-spaces summary svg {
+    transition: none;
+  }
+  .app-shell .team-space-card:hover {
+    transform: none;
+  }
+}
