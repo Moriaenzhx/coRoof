@@ -14,8 +14,10 @@ PARSERS = BoundedSemaphore(2)
 
 def parse(payload: ImportInput) -> tuple[bytes, str]:
     suffix = Path(payload.file_name).suffix.lower().removeprefix(".")
-    if suffix not in {"txt", "md", "pdf", "docx"}:
-        fail("unsupported_file", "支持 TXT、Markdown、文本 PDF 和 DOCX")
+    if suffix == "xls":
+        fail("unsupported_file", "旧版 XLS 请先在原软件中另存为 XLSX 或 CSV，再导入")
+    if suffix not in {"txt", "md", "pdf", "docx", "xlsx", "csv"}:
+        fail("unsupported_file", "支持 XLSX、CSV、TXT、Markdown、文本 PDF 和 DOCX")
     try:
         data = base64.b64decode(payload.file_base64.get_secret_value(), validate=True)
     except (ValueError, binascii.Error):
@@ -33,6 +35,24 @@ def parse(payload: ImportInput) -> tuple[bytes, str]:
             check=False,
         )
         if result.returncode != 0:
+            code = json.loads(result.stdout).get("error") if result.stdout else None
+            spreadsheet_errors = {
+                "csv_encoding": "CSV 编码无法识别，请另存为 UTF-8 CSV 后重试",
+                "csv_structure": "CSV 列数或引号不一致，或分隔符无法识别；请核对后另存为标准 CSV",
+                "spreadsheet_hidden": (
+                    "表格包含隐藏内容；请先删除隐藏工作表、行、列或名称，另存可分享副本后导入"
+                ),
+                "spreadsheet_active": (
+                    "表格包含宏、嵌入对象或外部链接；请另存为不含这些内容的 XLSX 或 CSV"
+                ),
+                "spreadsheet_limit": (
+                    "表格超限：最多 20 个工作表、合计 2000 行、100 列、"
+                    "20000 个单元格、12 万字；请拆分后导入"
+                ),
+                "spreadsheet_empty": "表格没有可导入的单元格内容",
+            }
+            if isinstance(code, str) and code in spreadsheet_errors:
+                fail(code, spreadsheet_errors[code])
             fail(
                 "unsupported_content",
                 "无法提取文本：请检查格式、加密或文件大小；扫描 PDF 暂不支持 OCR",

@@ -44,6 +44,14 @@ class ImportInput(DocumentAccess):
         return value
 
 
+class ImportPreviewOut(DTO):
+    file_name: str
+    file_hash: str
+    content: str
+    duplicate_document_id: str | None = None
+    duplicate_title: str | None = None
+
+
 class DocumentCommand(DTO):
     expected_version: int = Field(ge=1)
     idempotency_key: UUID

@@ -21,6 +21,7 @@ from app.modules.knowledge.schemas import (
     DocumentPublish,
     DocumentView,
     ImportInput,
+    ImportPreviewOut,
     RevisionOut,
     SearchOut,
     Visibility,
@@ -91,6 +92,60 @@ def documents(
 @router.post("/documents", response_model=DocumentOut, status_code=201)
 def create(payload: DocumentInput, db: Db, actor: Actor) -> DocumentOut:
     return service.create(db, actor, payload)
+
+
+@router.post("/import/preview", response_model=ImportPreviewOut)
+def preview_import(payload: ImportInput, db: Db, actor: Actor) -> ImportPreviewOut:
+    access.validate_access(db, actor, payload)
+    db.commit()
+    data, content = importer.parse(payload)
+    # Reauthorize after the isolated parser; preview never creates a draft or event.
+    access.authorize(db, actor)
+    access.validate_access(db, actor, payload)
+    file_hash = service.digest(data)
+    # Only the author's current source is eligible. Hidden or superseded revisions
+    # must not disclose another person's files through a duplicate-file oracle.
+    duplicate = db.execute(
+        access.scope(actor)
+        .join(
+            KnowledgeRevision,
+            (KnowledgeRevision.organization_id == KnowledgeDocument.organization_id)
+            & (KnowledgeRevision.document_id == KnowledgeDocument.id)
+            & (KnowledgeRevision.id == KnowledgeDocument.published_id),
+        )
+        .where(
+            KnowledgeDocument.author_id == actor.id,
+            KnowledgeRevision.file_hash == file_hash,
+            KnowledgeRevision.edited_extraction.is_(False),
+        )
+        .order_by(KnowledgeDocument.updated_at.desc(), KnowledgeDocument.id)
+        .limit(1)
+    ).scalar_one_or_none()
+    if duplicate is None:
+        duplicate = db.execute(
+            access.scope(actor)
+            .join(
+                KnowledgeRevision,
+                (KnowledgeRevision.organization_id == KnowledgeDocument.organization_id)
+                & (KnowledgeRevision.document_id == KnowledgeDocument.id)
+                & (KnowledgeRevision.id == KnowledgeDocument.draft_id),
+            )
+            .where(
+                KnowledgeDocument.author_id == actor.id,
+                KnowledgeRevision.author_id == actor.id,
+                KnowledgeRevision.file_hash == file_hash,
+                KnowledgeRevision.edited_extraction.is_(False),
+            )
+            .order_by(KnowledgeDocument.updated_at.desc(), KnowledgeDocument.id)
+            .limit(1)
+        ).scalar_one_or_none()
+    return ImportPreviewOut(
+        file_name=payload.file_name,
+        file_hash=file_hash,
+        content=content,
+        duplicate_document_id=duplicate.id if duplicate else None,
+        duplicate_title=duplicate.title if duplicate else None,
+    )
 
 
 @router.post("/import", response_model=DocumentOut, status_code=201)

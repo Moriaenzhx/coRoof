@@ -321,6 +321,77 @@
   min-height: 44px;
   align-items: center;
 }
+.app-shell .knowledge-access-guard {
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+.app-shell .knowledge-import-preview {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line, #e8ebef);
+  border-radius: 16px;
+  background: #fafbfc;
+}
+.app-shell .knowledge-import-preview-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 14px;
+}
+.app-shell .knowledge-import-preview-heading h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.app-shell .knowledge-import-preview-heading span {
+  overflow-wrap: anywhere;
+  color: var(--muted, #626d7c);
+  font-size: 12px;
+}
+.app-shell .knowledge-import-preview pre {
+  margin: 0;
+  max-height: 320px;
+  min-width: 0;
+  padding: 16px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  border: 1px solid #edf0f3;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text, #515b6a);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.app-shell .knowledge-import-preview pre:focus-visible {
+  outline: 2px solid #7890ac;
+  outline-offset: 2px;
+}
+.app-shell .knowledge-import-preview .fine-print {
+  margin-bottom: 0;
+}
+.app-shell .knowledge-import-duplicate {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #faf5e9;
+  font-size: 13px;
+  color: #7a6337;
+  overflow-wrap: anywhere;
+}
+.app-shell .knowledge-import-duplicate p {
+  margin: 0 0 6px;
+}
+.app-shell .knowledge-import-duplicate .checkbox-line {
+  min-height: 44px;
+  margin: 0;
+  align-items: center;
+  font-size: 13px;
+}
 @media (max-width: 640px) {
   .app-shell .knowledge-library {
     gap: 18px;

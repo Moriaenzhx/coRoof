@@ -97,6 +97,16 @@ beforeEach(() => {
     return { data: [] };
   });
   mocks.post.mockImplementation(async (path: string, options) => {
+    if (path === "/api/v1/knowledge/import/preview")
+      return {
+        data: {
+          file_name: options.body.file_name,
+          file_hash: "synthetic-hash",
+          content: "客户,项目\n模拟客户,测试交付",
+          duplicate_document_id: null,
+          duplicate_title: null,
+        } satisfies Schemas["ImportPreviewOut"],
+      };
     if (path.endsWith("/publish"))
       active = {
         ...active,
@@ -519,7 +529,7 @@ it("offers import and writing from one entry without automatically creating or p
   await user.click(screen.getByRole("button", { name: "添加资料" }));
   await user.click(screen.getByRole("button", { name: /导入文件/ }));
   expect(screen.getByLabelText("选择文件").getAttribute("accept")).toBe(
-    ".txt,.md,.pdf,.docx",
+    ".txt,.md,.pdf,.docx,.xlsx,.csv",
   );
   expect(screen.queryByLabelText("文档正文")).toBeNull();
   expect(screen.getByText(/扫描 PDF 暂不支持/)).toBeTruthy();
@@ -581,9 +591,212 @@ it("stops an unfinished file read from importing after the member changes", asyn
   await user.click(screen.getByRole("button", { name: /导入文件/ }));
   await user.upload(screen.getByLabelText("选择文件"), file);
   expect(screen.getByDisplayValue("合成测试")).toBeTruthy();
-  await user.click(screen.getByRole("button", { name: "保存草稿" }));
+  await user.click(screen.getByRole("button", { name: "预览文件" }));
   rerender(<Knowledge {...props} memberId="new-member" />);
   await act(async () => finish(new ArrayBuffer(4)));
   expect(mocks.post).not.toHaveBeenCalled();
   expect(screen.queryByRole("dialog")).toBeNull();
+});
+
+function syntheticFile(name: string, content = "客户,项目\n模拟客户,测试交付") {
+  const file = new File([content], name, {
+    type: name.endsWith(".xlsx")
+      ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      : "text/csv",
+  });
+  Object.defineProperty(file, "arrayBuffer", {
+    value: () => Promise.resolve(new TextEncoder().encode(content).buffer),
+  });
+  return file;
+}
+
+it.each(["销售导出.xlsx", "销售导出.csv"])(
+  "previews %s without creating records and saves the exact reviewed input as a draft",
+  async (name) => {
+    const user = userEvent.setup();
+    render(<Knowledge {...props} />);
+    await user.click(screen.getByRole("button", { name: "添加资料" }));
+    await user.click(screen.getByRole("button", { name: /导入文件/ }));
+    await user.upload(screen.getByLabelText("选择文件"), syntheticFile(name));
+    await user.click(screen.getByRole("button", { name: "预览文件" }));
+    expect(mocks.post.mock.calls.map(([path]) => path)).toEqual([
+      "/api/v1/knowledge/import/preview",
+    ]);
+    await screen.findByRole("region", { name: "文件预览" });
+    expect(screen.getByLabelText("提取的文件内容").textContent).toContain(
+      "模拟客户",
+    );
+    expect(screen.getByText(/不会自动生成订单或修改财务记录/)).toBeTruthy();
+    expect(mocks.post.mock.calls.map(([path]) => path)).toEqual([
+      "/api/v1/knowledge/import/preview",
+    ]);
+    const reviewedInput = mocks.post.mock.calls[0][1].body;
+    expect(reviewedInput.file_name).toBe(name);
+    await user.click(screen.getByRole("button", { name: "保存为草稿" }));
+    await screen.findByRole("button", { name: "确认发布" });
+    expect(mocks.post.mock.calls.map(([path]) => path)).toEqual([
+      "/api/v1/knowledge/import/preview",
+      "/api/v1/knowledge/import",
+    ]);
+    expect(mocks.post.mock.calls[1][1].body).toEqual(reviewedInput);
+    expect(
+      (screen.getByRole("button", { name: "确认发布" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+  },
+);
+
+it("requires duplicate acknowledgement and clears it when the sharing scope changes", async () => {
+  const original = mocks.post.getMockImplementation()!;
+  mocks.post.mockImplementation(async (path, options) => {
+    const result = await original(path, options);
+    return path.endsWith("/preview")
+      ? {
+          data: {
+            ...result.data,
+            duplicate_document_id: "existing",
+            duplicate_title: "已存销售表",
+          },
+        }
+      : result;
+  });
+  const user = userEvent.setup();
+  render(<Knowledge {...props} />);
+  await user.click(screen.getByRole("button", { name: "添加资料" }));
+  await user.click(screen.getByRole("button", { name: /导入文件/ }));
+  await user.upload(
+    screen.getByLabelText("选择文件"),
+    syntheticFile("重复文件.csv"),
+  );
+  await user.click(screen.getByRole("button", { name: "预览文件" }));
+  await screen.findByText(/已导入过这个文件：已存销售表/);
+  expect(
+    (screen.getByRole("button", { name: "保存为草稿" }) as HTMLButtonElement)
+      .disabled,
+  ).toBe(true);
+  await user.click(screen.getByLabelText("我仍要另存一份"));
+  expect(
+    (screen.getByRole("button", { name: "保存为草稿" }) as HTMLButtonElement)
+      .disabled,
+  ).toBe(false);
+  await user.click(screen.getByText(/发布后谁可以看/));
+  await user.selectOptions(screen.getByLabelText("可见范围"), "organization");
+  expect(screen.queryByRole("region", { name: "文件预览" })).toBeNull();
+  await user.click(screen.getByRole("button", { name: "预览文件" }));
+  await screen.findByText(/已导入过这个文件：已存销售表/);
+  expect(
+    (screen.getByLabelText("我仍要另存一份") as HTMLInputElement).checked,
+  ).toBe(false);
+  expect(
+    (screen.getByRole("button", { name: "保存为草稿" }) as HTMLButtonElement)
+      .disabled,
+  ).toBe(true);
+  expect(
+    mocks.post.mock.calls.every(([path]) => path.endsWith("/preview")),
+  ).toBe(true);
+});
+
+it("ignores a late preview after a different file is selected", async () => {
+  let finish: (result: unknown) => void = () => {};
+  const delayed = new Promise((resolve) => {
+    finish = resolve;
+  });
+  const original = mocks.post.getMockImplementation()!;
+  mocks.post.mockImplementation((path, options) =>
+    options.body.file_name === "旧表.csv" ? delayed : original(path, options),
+  );
+  const user = userEvent.setup();
+  render(<Knowledge {...props} />);
+  await user.click(screen.getByRole("button", { name: "添加资料" }));
+  await user.click(screen.getByRole("button", { name: /导入文件/ }));
+  await user.upload(
+    screen.getByLabelText("选择文件"),
+    syntheticFile("旧表.csv"),
+  );
+  await user.click(screen.getByRole("button", { name: "预览文件" }));
+  await waitFor(() => expect(mocks.post).toHaveBeenCalledTimes(1));
+  await user.upload(
+    screen.getByLabelText("选择文件"),
+    syntheticFile("新表.csv"),
+  );
+  await user.click(screen.getByRole("button", { name: "预览文件" }));
+  await screen.findByRole("region", { name: "文件预览" });
+  await act(async () =>
+    finish({
+      data: {
+        file_name: "旧表.csv",
+        file_hash: "old",
+        content: "不能出现的旧内容",
+        duplicate_document_id: null,
+        duplicate_title: null,
+      },
+    }),
+  );
+  expect(screen.queryByText("不能出现的旧内容")).toBeNull();
+  expect(screen.getByText("新表.csv")).toBeTruthy();
+  await user.click(screen.getByRole("button", { name: "保存为草稿" }));
+  await waitFor(() =>
+    expect(mocks.post.mock.calls.at(-1)?.[0]).toBe("/api/v1/knowledge/import"),
+  );
+  expect(mocks.post.mock.calls.at(-1)?.[1].body.file_name).toBe("新表.csv");
+});
+
+it.each(["close", "method", "organization"])(
+  "abandons pending file reads on %s without a late preview or save",
+  async (exit) => {
+    let finish: (value: ArrayBuffer) => void = () => {};
+    const pendingBytes = new Promise<ArrayBuffer>((resolve) => {
+      finish = resolve;
+    });
+    const file = new File(["合成数据"], "待读取.csv", { type: "text/csv" });
+    Object.defineProperty(file, "arrayBuffer", { value: () => pendingBytes });
+    const user = userEvent.setup();
+    const { rerender } = render(<Knowledge {...props} />);
+    await user.click(screen.getByRole("button", { name: "添加资料" }));
+    await user.click(screen.getByRole("button", { name: /导入文件/ }));
+    await user.upload(screen.getByLabelText("选择文件"), file);
+    await user.click(screen.getByRole("button", { name: "预览文件" }));
+    if (exit === "close")
+      await user.click(screen.getByRole("button", { name: "关闭详情" }));
+    else if (exit === "method")
+      await user.click(
+        screen.getByRole("button", { name: "重新选择添加方式" }),
+      );
+    else
+      rerender(<Knowledge {...props} organizationId="another-organization" />);
+    await act(async () => finish(new ArrayBuffer(4)));
+    expect(mocks.post).not.toHaveBeenCalled();
+    expect(screen.queryByRole("region", { name: "文件预览" })).toBeNull();
+  },
+);
+
+it("retries a failed draft save with the reviewed idempotency key", async () => {
+  const original = mocks.post.getMockImplementation()!;
+  let attempts = 0;
+  mocks.post.mockImplementation((path, options) => {
+    if (path === "/api/v1/knowledge/import" && ++attempts === 1)
+      return Promise.reject(new Error("连接暂时中断，请重试"));
+    return original(path, options);
+  });
+  const user = userEvent.setup();
+  render(<Knowledge {...props} />);
+  await user.click(screen.getByRole("button", { name: "添加资料" }));
+  await user.click(screen.getByRole("button", { name: /导入文件/ }));
+  await user.upload(
+    screen.getByLabelText("选择文件"),
+    syntheticFile("待重试.csv"),
+  );
+  await user.click(screen.getByRole("button", { name: "预览文件" }));
+  await screen.findByRole("region", { name: "文件预览" });
+  await user.click(screen.getByRole("button", { name: "保存为草稿" }));
+  await screen.findByText("连接暂时中断，请重试");
+  await user.click(screen.getByRole("button", { name: "保存为草稿" }));
+  await screen.findByRole("button", { name: "确认发布" });
+  expect(mocks.post.mock.calls).toHaveLength(3);
+  expect(mocks.post.mock.calls[1][1].body).toEqual(
+    mocks.post.mock.calls[0][1].body,
+  );
+  expect(mocks.post.mock.calls[2][1].body).toEqual(
+    mocks.post.mock.calls[0][1].body,
+  );
 });
