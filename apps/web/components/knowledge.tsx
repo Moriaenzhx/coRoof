@@ -145,20 +145,42 @@ function NewDocument({
   const [content, setContent] = useState("");
   const [access, setAccess] = useState<Access>(initialAccess);
   const [file, setFile] = useState<File | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [phase, setPhase] = useState<"idle" | "preview" | "save">("idle");
+  const [preview, setPreview] = useState<{
+    result: Schemas["ImportPreviewOut"];
+    input: Schemas["ImportInput"];
+  } | null>(null);
+  const [allowDuplicate, setAllowDuplicate] = useState(false);
   const [error, setError] = useState("");
   const request = useRef({ signature: "", key: crypto.randomUUID() });
-  const active = useRef(true);
-  useEffect(() => {
-    active.current = true;
-    return () => {
-      active.current = false;
-    };
-  }, []);
-  async function save() {
-    if (busy) return;
-    setBusy(true);
+  const generation = useRef(0);
+  const pending = useRef(false);
+  useEffect(
+    () => () => {
+      generation.current++;
+      pending.current = false;
+    },
+    [],
+  );
+
+  function invalidatePreview() {
+    generation.current++;
+    pending.current = false;
+    setPhase("idle");
+    setPreview(null);
+    setAllowDuplicate(false);
     setError("");
+    request.current = { signature: "", key: crypto.randomUUID() };
+  }
+
+  async function save() {
+    if (pending.current) return;
+    if (preview?.result.duplicate_document_id && !allowDuplicate) return;
+    const current = ++generation.current;
+    pending.current = true;
+    setPhase(method === "import" && !preview ? "preview" : "save");
+    setError("");
+    const isCurrent = () => current === generation.current;
     try {
       const signature = JSON.stringify([
         method,
@@ -174,49 +196,71 @@ function NewDocument({
       const params = {
         header: { "x-organization-id": context.organizationId },
       };
-      let result: Document;
-      if (method === "import") {
+      if (method === "import" && !preview) {
         if (!file) throw new Error("请选择要导入的文件。");
         if (file.size > 4_000_000 || !file.size)
           throw new Error("文件须小于 4 MB 且不为空。");
+        if (!/\.(txt|md|pdf|docx|xlsx|csv)$/i.test(file.name))
+          throw new Error(
+            "请选择支持的文件；旧版 Excel 请先另存为 XLSX 或 CSV。",
+          );
         const bytes = new Uint8Array(await file.arrayBuffer());
-        if (!active.current) return;
+        if (!isCurrent()) return;
         let binary = "";
         for (let index = 0; index < bytes.length; index += 8192)
           binary += String.fromCharCode(...bytes.subarray(index, index + 8192));
-        result = unwrap(
-          await api(context.organizationId).POST("/api/v1/knowledge/import", {
-            params,
-            body: {
-              ...access,
-              title,
-              file_name: file.name,
-              file_base64: btoa(binary),
-              idempotency_key: request.current.key,
-            },
-          }),
-        );
-      } else {
-        result = unwrap(
+        const input: Schemas["ImportInput"] = {
+          ...access,
+          title,
+          file_name: file.name,
+          file_base64: btoa(binary),
+          idempotency_key: request.current.key,
+        };
+        const result = unwrap(
           await api(context.organizationId).POST(
-            "/api/v1/knowledge/documents",
+            "/api/v1/knowledge/import/preview",
             {
               params,
-              body: {
-                ...access,
-                title,
-                content,
-                idempotency_key: request.current.key,
-              },
+              body: input,
             },
           ),
         );
+        if (isCurrent()) setPreview({ result, input });
+        return;
       }
-      if (active.current) onSaved(result);
+      const result =
+        method === "import" && preview
+          ? unwrap(
+              await api(context.organizationId).POST(
+                "/api/v1/knowledge/import",
+                {
+                  params,
+                  body: preview.input,
+                },
+              ),
+            )
+          : unwrap(
+              await api(context.organizationId).POST(
+                "/api/v1/knowledge/documents",
+                {
+                  params,
+                  body: {
+                    ...access,
+                    title,
+                    content,
+                    idempotency_key: request.current.key,
+                  },
+                },
+              ),
+            );
+      if (isCurrent()) onSaved(result);
     } catch (e) {
-      if (active.current) setError(e instanceof Error ? e.message : "保存失败");
+      if (isCurrent()) setError(e instanceof Error ? e.message : "保存失败");
     } finally {
-      if (active.current) setBusy(false);
+      if (isCurrent()) {
+        pending.current = false;
+        setPhase("idle");
+      }
     }
   }
   if (!method)
@@ -230,7 +274,7 @@ function NewDocument({
           <Upload size={24} aria-hidden="true" />
           <span>
             <strong>导入文件</strong>
-            <small>上传已有制度、手册或说明</small>
+            <small>上传 Excel 表格、制度、手册或说明</small>
           </span>
           <ChevronRight size={18} aria-hidden="true" />
         </button>
@@ -261,7 +305,12 @@ function NewDocument({
       <button
         className="plain knowledge-method-back"
         type="button"
-        onClick={() => setMethod(null)}
+        disabled={phase === "save"}
+        onClick={() => {
+          invalidatePreview();
+          setFile(null);
+          setMethod(null);
+        }}
       >
         重新选择添加方式
       </button>
@@ -271,7 +320,11 @@ function NewDocument({
           required
           maxLength={200}
           value={title}
-          onChange={(event) => setTitle(event.target.value)}
+          disabled={phase === "save"}
+          onChange={(event) => {
+            invalidatePreview();
+            setTitle(event.target.value);
+          }}
         />
       </label>
       {method === "import" && (
@@ -280,9 +333,11 @@ function NewDocument({
             选择文件
             <input
               type="file"
-              required
-              accept=".txt,.md,.pdf,.docx"
+              aria-required="true"
+              accept=".txt,.md,.pdf,.docx,.xlsx,.csv"
+              disabled={phase === "save"}
               onChange={(event) => {
+                invalidatePreview();
                 const next = event.target.files?.[0] || null;
                 setFile(next);
                 if (next && !title.trim())
@@ -291,7 +346,8 @@ function NewDocument({
             />
           </label>
           <p className="fine-print">
-            支持 TXT、Markdown、文本 PDF、DOCX，最大 4 MB。扫描 PDF 暂不支持。
+            支持 Excel（XLSX）、CSV、TXT、Markdown、文本 PDF、DOCX，最大 4 MB。
+            旧版 XLS 请先另存为 XLSX 或 CSV；扫描 PDF 暂不支持。
           </p>
         </>
       )}
@@ -303,6 +359,7 @@ function NewDocument({
             rows={12}
             maxLength={120000}
             value={content}
+            disabled={phase === "save"}
             onChange={(event) => setContent(event.target.value)}
           />
         </label>
@@ -311,11 +368,71 @@ function NewDocument({
         <summary>
           发布后谁可以看 · {scopeNames[access.visibility || "private"]}
         </summary>
-        <AccessFields value={access} onChange={setAccess} context={context} />
+        <fieldset
+          className="knowledge-access-guard"
+          disabled={phase === "save"}
+        >
+          <AccessFields
+            value={access}
+            onChange={(next) => {
+              invalidatePreview();
+              setAccess(next);
+            }}
+            context={context}
+          />
+        </fieldset>
       </details>
+      {preview && (
+        <section className="knowledge-import-preview" aria-label="文件预览">
+          <div className="knowledge-import-preview-heading">
+            <h3>核对文件内容</h3>
+            <span>{preview.result.file_name}</span>
+          </div>
+          <pre tabIndex={0} aria-label="提取的文件内容">
+            {preview.result.content}
+          </pre>
+          {/\.(xlsx|csv)$/i.test(preview.input.file_name) && (
+            <p className="fine-print">
+              表格将保存为可查阅的资料，不会自动生成订单或修改财务记录。
+            </p>
+          )}
+          {preview.result.duplicate_document_id && (
+            <div className="knowledge-import-duplicate" role="status">
+              <p>
+                已导入过这个文件：{preview.result.duplicate_title || "已有资料"}
+                。
+              </p>
+              <label className="checkbox-line">
+                <input
+                  type="checkbox"
+                  checked={allowDuplicate}
+                  disabled={phase === "save"}
+                  onChange={(event) => setAllowDuplicate(event.target.checked)}
+                />
+                我仍要另存一份
+              </label>
+            </div>
+          )}
+        </section>
+      )}
       {error && <Feedback kind="error">{error}</Feedback>}
-      <button className="primary" disabled={busy} type="submit">
-        {busy ? "正在保存…" : "保存草稿"}
+      <button
+        className="primary"
+        disabled={
+          phase !== "idle" ||
+          !!(preview?.result.duplicate_document_id && !allowDuplicate)
+        }
+        type="submit"
+      >
+        {phase === "preview"
+          ? "正在读取文件…"
+          : phase === "save"
+            ? "正在保存…"
+            : method === "import" && !preview
+              ? "预览文件"
+              : method === "import"
+                ? "保存为草稿"
+                : "保存草稿"}
       </button>
     </form>
   );

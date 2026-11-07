@@ -770,6 +770,74 @@
         }
       }
     },
+    "/api/v1/knowledge/import/preview": {
+      "post": {
+        "tags": [
+          "knowledge"
+        ],
+        "summary": "Preview Import",
+        "operationId": "preview_import_api_v1_knowledge_import_preview_post",
+        "parameters": [
+          {
+            "name": "x-organization-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "X-Organization-Id"
+            }
+          },
+          {
+            "name": "coroof_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Coroof Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportPreviewOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/knowledge/import": {
       "post": {
         "tags": [
@@ -14587,6 +14655,52 @@
           "idempotency_key"
         ],
         "title": "ImportInput"
+      },
+      "ImportPreviewOut": {
+        "properties": {
+          "file_name": {
+            "type": "string",
+            "title": "File Name"
+          },
+          "file_hash": {
+            "type": "string",
+            "title": "File Hash"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "duplicate_document_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duplicate Document Id"
+          },
+          "duplicate_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duplicate Title"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "file_name",
+          "file_hash",
+          "content"
+        ],
+        "title": "ImportPreviewOut"
       },
       "InitiativeInput": {
         "properties": {

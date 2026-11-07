@@ -159,6 +159,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/knowledge/import/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Preview Import */
+        post: operations["preview_import_api_v1_knowledge_import_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/knowledge/import": {
         parameters: {
             query?: never;
@@ -2417,6 +2434,19 @@ export interface components {
              */
             idempotency_key: string;
         };
+        /** ImportPreviewOut */
+        ImportPreviewOut: {
+            /** File Name */
+            file_name: string;
+            /** File Hash */
+            file_hash: string;
+            /** Content */
+            content: string;
+            /** Duplicate Document Id */
+            duplicate_document_id?: string | null;
+            /** Duplicate Title */
+            duplicate_title?: string | null;
+        };
         /** InitiativeInput */
         InitiativeInput: {
             /** Title */
@@ -4262,6 +4292,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DocumentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_import_api_v1_knowledge_import_preview_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path?: never;
+            cookie?: {
+                coroof_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportPreviewOut"];
                 };
             };
             /** @description Validation Error */
