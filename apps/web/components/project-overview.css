@@ -1,0 +1,226 @@
+.project-overview {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  container-type: inline-size;
+}
+.project-overview-heading,
+.project-overview-title,
+.project-overview-title h3 > button,
+.project-overview-support > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.project-overview-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 18px;
+  margin: 0;
+}
+.project-overview-heading p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.project-overview-heading > button {
+  flex-shrink: 0;
+  min-height: 44px;
+  font-size: 12px;
+}
+.project-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 14px;
+}
+.project-overview-card {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--paper);
+  padding: 18px 20px;
+}
+.project-overview-title {
+  align-items: flex-start;
+}
+.project-overview-title h3 > button {
+  min-width: 0;
+  min-height: 32px;
+  padding: 2px 0;
+  text-align: left;
+  color: var(--ink);
+  font: inherit;
+}
+.project-overview-title h3 {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.project-overview-title svg,
+.project-overview-title > .status-label {
+  flex-shrink: 0;
+}
+.project-overview-goal {
+  color: var(--text);
+  margin: 10px 0 12px;
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.project-overview-facts,
+.project-overview-facts > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.project-overview-facts {
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.project-overview-facts > span {
+  overflow-wrap: anywhere;
+}
+.project-overview-facts > span:last-child {
+  flex-basis: 100%;
+}
+.project-overview-counts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.project-overview-progress {
+  margin: 14px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ink);
+}
+.project-overview-progress > span {
+  color: var(--muted);
+}
+.project-overview-progress > strong {
+  color: var(--amber);
+  font-weight: 500;
+}
+.project-overview-details {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.project-overview-details > summary {
+  width: fit-content;
+  cursor: pointer;
+  padding: 8px 0;
+}
+.project-overview-details .project-overview-counts {
+  margin-top: 2px;
+}
+.project-overview-counts dt {
+  font-size: 11px;
+  color: var(--muted);
+}
+.project-overview-counts dd {
+  margin: 4px 0 0;
+  color: var(--ink);
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+.project-overview-support {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--amber-bg);
+  color: var(--amber);
+  font-size: 11px;
+}
+.project-overview-support > div > .plain {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0;
+  min-height: 36px;
+  min-width: 0;
+  flex: 1;
+  color: inherit;
+  font-size: 12px;
+  text-align: left;
+}
+.project-overview-support > div > .plain span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.project-overview-support svg {
+  flex-shrink: 0;
+}
+.project-overview-ask {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border-color: transparent;
+}
+.project-overview-scope,
+.project-overview-unknown,
+.project-overview-empty {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.project-overview-scope {
+  margin: 0;
+  font-size: 11px;
+}
+.project-overview-unknown {
+  margin: 14px 0 0;
+}
+.project-overview-empty {
+  margin: 0;
+  padding: 14px 0;
+}
+.project-overview button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+@container (max-width: 900px) {
+  .project-overview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 600px) {
+  .project-overview-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .project-overview-card {
+    padding: 16px;
+  }
+  .project-overview-title h3 > button,
+  .project-overview-support > div > .plain,
+  .project-overview-ask,
+  .project-overview-details > summary {
+    min-height: 44px;
+  }
+  .project-overview-ask {
+    width: 44px;
+  }
+}

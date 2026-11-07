@@ -1,0 +1,90 @@
+.coroof-character {
+  display: block;
+  width: var(--coroof-character-size, 80px);
+  height: auto;
+  aspect-ratio: 5 / 6;
+  flex-shrink: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.coroof-character-figure {
+  transform-box: view-box;
+  transform-origin: 40px 77px;
+  animation: coroof-character-breathe 4.8s ease-in-out infinite;
+}
+
+.coroof-character-eyes {
+  transform-box: view-box;
+  transform-origin: 40px 32px;
+  animation: coroof-character-blink 7.8s ease-in-out infinite;
+}
+
+.coroof-character-wave {
+  transform-box: view-box;
+  transform-origin: 53px 54px;
+}
+
+.coroof-character[data-state="greeting"] .coroof-character-wave {
+  animation: coroof-character-wave 1.65s ease-in-out 1;
+}
+
+.coroof-character[data-paused="true"],
+.coroof-character[data-paused="true"] * {
+  animation-play-state: paused !important;
+}
+
+@keyframes coroof-character-breathe {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(-1px) scaleY(1.012);
+  }
+}
+
+@keyframes coroof-character-blink {
+  0%,
+  45%,
+  49%,
+  93%,
+  97%,
+  100% {
+    transform: scaleY(1);
+  }
+  47%,
+  95% {
+    transform: scaleY(0.12);
+  }
+}
+
+@keyframes coroof-character-wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20%,
+  48%,
+  76% {
+    transform: rotate(-112deg);
+  }
+  34%,
+  62% {
+    transform: rotate(-92deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coroof-character,
+  .coroof-character * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .coroof-character-figure,
+  .coroof-character-eyes,
+  .coroof-character-wave {
+    transform: none !important;
+  }
+}

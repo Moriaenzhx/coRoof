@@ -1,0 +1,101 @@
+name: coroof-v1
+services:
+  postgres:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_USER: coroof
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-coroof-local-only}
+      POSTGRES_DB: coroof
+    ports: ["127.0.0.1:${POSTGRES_PORT:-55432}:5432"]
+    volumes: ["postgres-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coroof -d coroof"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  redis:
+    image: redis:7-alpine
+    ports: ["127.0.0.1:${REDIS_PORT:-56379}:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  migrate:
+    build: {context: .., dockerfile: infra/backend.Dockerfile}
+    command: ["/app/.venv/bin/alembic", "upgrade", "head"]
+    environment: &backend-env
+      COROOF_ENVIRONMENT: development
+      COROOF_AUTH_MODE: mock
+      COROOF_AI_PROVIDER: ${COROOF_AI_PROVIDER:-rules}
+      COROOF_AI_BASE_URL: ${COROOF_AI_BASE_URL:-}
+      COROOF_AI_MODEL: ${COROOF_AI_MODEL:-}
+      COROOF_AI_API_KEY: ${COROOF_AI_API_KEY:-}
+      COROOF_AI_MODEL_VERIFIED: ${COROOF_AI_MODEL_VERIFIED:-false}
+      COROOF_AI_TIMEOUT_SECONDS: ${COROOF_AI_TIMEOUT_SECONDS:-25}
+      COROOF_AI_MAX_INPUT_TOKENS: ${COROOF_AI_MAX_INPUT_TOKENS:-24000}
+      COROOF_AI_MAX_OUTPUT_TOKENS: ${COROOF_AI_MAX_OUTPUT_TOKENS:-2500}
+      COROOF_AI_DAILY_CALL_LIMIT: ${COROOF_AI_DAILY_CALL_LIMIT:-100}
+      COROOF_AI_DAILY_TOKEN_LIMIT: ${COROOF_AI_DAILY_TOKEN_LIMIT:-200000}
+      COROOF_AI_MONTHLY_TOKEN_LIMIT: ${COROOF_AI_MONTHLY_TOKEN_LIMIT:-6000000}
+      COROOF_AI_CONCURRENCY_LIMIT: ${COROOF_AI_CONCURRENCY_LIMIT:-2}
+      COROOF_AI_OUTPUT_MODE: ${COROOF_AI_OUTPUT_MODE:-schema}
+      COROOF_AI_SECRET_KEY: ${COROOF_AI_SECRET_KEY:-}
+      COROOF_CONNECTOR_ALLOWED_BASE_URLS: ${COROOF_CONNECTOR_ALLOWED_BASE_URLS:-[]}
+      COROOF_AI_ALLOWED_BASE_URLS: ${COROOF_AI_ALLOWED_BASE_URLS:-[]}
+      COROOF_AI_DEVELOPMENT_TEST_CONNECTION_IDS: ${COROOF_AI_DEVELOPMENT_TEST_CONNECTION_IDS:-[]}
+      COROOF_DATABASE_URL: postgresql+psycopg://coroof:${POSTGRES_PASSWORD:-coroof-local-only}@postgres:5432/coroof
+      COROOF_REDIS_URL: redis://redis:6379/0
+      COROOF_WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
+    depends_on:
+      postgres: {condition: service_healthy}
+  api:
+    build: {context: .., dockerfile: infra/backend.Dockerfile}
+    command: ["/app/.venv/bin/uvicorn", "app.main:app", "--host", "0.0.0.0", "--no-access-log"]
+    environment: *backend-env
+    ports: ["127.0.0.1:${API_PORT:-8000}:8000"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD", "uv", "run", "--no-sync", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/readyz')"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  worker:
+    init: true
+    stop_grace_period: 180s
+    build: {context: .., dockerfile: infra/backend.Dockerfile}
+    command: ["/app/.venv/bin/celery", "-A", "worker.app:celery", "worker", "--loglevel=WARNING", "--concurrency=2", "--hostname=coroof@%h"]
+    environment: *backend-env
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD-SHELL", "uv run --no-sync celery -A worker.app:celery inspect ping -d coroof@$$HOSTNAME --timeout=3"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+  scheduler:
+    init: true
+    build: {context: .., dockerfile: infra/backend.Dockerfile}
+    command: ["/app/.venv/bin/celery", "-A", "worker.app:celery", "beat", "--loglevel=WARNING", "--schedule=/tmp/coroof-beat"]
+    environment: *backend-env
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
+  web:
+    build: {context: .., dockerfile: infra/web.Dockerfile}
+    environment:
+      API_INTERNAL_URL: http://api:8000
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+    ports: ["127.0.0.1:${WEB_PORT:-3000}:3000"]
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+volumes:
+  postgres-data:

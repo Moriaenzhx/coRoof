@@ -1,0 +1,11 @@
+{$COROOF_DOMAIN} {
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+	# Access logging is intentionally disabled: OIDC callback query contains a code.
+	reverse_proxy web:3000
+}

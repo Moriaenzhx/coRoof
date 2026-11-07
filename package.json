@@ -1,0 +1,23 @@
+{
+  "name": "coroof",
+  "private": true,
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace apps/web",
+    "build": "npm run build --workspace apps/web",
+    "typecheck": "npm run typecheck --workspace apps/web",
+    "test": "npm run test --workspace apps/web",
+    "format": "prettier --write apps/web packages/api-client package.json",
+    "format:check": "prettier --check apps/web packages/api-client package.json",
+    "api:generate": "openapi-typescript packages/api-client/openapi.json -o packages/api-client/schema.d.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.6.1",
+    "prettier": "^3.5.3"
+  },
+  "overrides": {
+    "minimatch": "^11.0.1"
+  }
+}

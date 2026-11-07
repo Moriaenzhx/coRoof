@@ -1,0 +1,21 @@
+.git
+.local
+.cache
+.tools
+node_modules
+**/node_modules
+**/.next
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/*.db
+**/.env
+**/.env.*
+!**/.env.example
+
+# Deployment secrets and database backups
+**/server.env
+*.dump
+*.backup

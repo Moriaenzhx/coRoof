@@ -1,0 +1,485 @@
+/* Decorative orbit motion never represents background Agent activity. */
+.panorama.living-panorama {
+  background: linear-gradient(115deg, #fff 40%, #fbfcfe 100%);
+  gap: 20px;
+  min-height: 310px;
+  padding: 20px 24px 46px;
+}
+
+.living-panorama .panorama-summary {
+  animation: panorama-arrive 380ms ease-out both;
+  justify-content: center;
+}
+
+.living-panorama .panorama-summary h2 {
+  margin: 14px 0 4px;
+  font-size: 24px;
+  letter-spacing: -0.7px;
+}
+
+.living-panorama .summary-numbers {
+  margin-top: 12px;
+  padding-top: 8px;
+}
+
+.living-panorama .summary-numbers strong {
+  font-size: 21px;
+}
+
+.living-panorama .panorama-value {
+  font-variant-numeric: tabular-nums;
+  animation: panorama-value-arrive 500ms ease-out both;
+}
+
+.living-panorama .orbit {
+  min-height: 360px;
+}
+
+.living-panorama .panorama-connections {
+  position: absolute;
+  inset: 13% 14%;
+  width: 72%;
+  height: 74%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.living-panorama .panorama-connections line {
+  stroke: #dce2ec;
+  stroke-width: 1;
+  transition:
+    stroke 180ms ease,
+    stroke-width 180ms ease;
+}
+
+.living-panorama .panorama-connections line[data-highlighted="true"] {
+  stroke: #8e9bb4;
+  stroke-width: 1.8;
+}
+
+.living-panorama .ring-outer {
+  border-color: #e7eaf0;
+}
+
+.living-panorama .ring-inner {
+  border-color: #edf0f4;
+}
+
+.living-panorama .orbit-core {
+  z-index: 1;
+  width: 166px;
+  height: 166px;
+  padding: 12px;
+  border-color: #e0e5ed;
+  background: #fff;
+  box-shadow:
+    0 8px 24px #22345708,
+    0 0 0 8px #ffffffa6;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.living-panorama .orbit-core[data-preview="true"] {
+  border-color: #bdc8d9;
+  box-shadow:
+    0 8px 28px #22345710,
+    0 0 0 8px #ffffffa6;
+}
+
+.living-panorama .panorama-core-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  animation: panorama-arrive 180ms ease-out both;
+}
+
+.living-panorama .panorama-core-symbol {
+  display: flex;
+  color: #6d7a92;
+  margin-bottom: 8px;
+}
+
+.living-panorama .panorama-core-name {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  max-width: 130px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+}
+
+.living-panorama .orbit-core strong {
+  margin-top: 8px;
+  font-size: 25px;
+  font-variant-numeric: tabular-nums;
+}
+
+.living-panorama .orbit-core strong small {
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.living-panorama .orbit-core p {
+  font-size: 10px;
+  margin-top: 5px;
+}
+
+.living-panorama .panorama-core-hint {
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.living-panorama .department-node {
+  z-index: 2;
+  min-width: 144px;
+  max-width: 178px;
+  padding: 10px 12px;
+  align-items: flex-start;
+  background: #fff;
+  border-color: #e2e6ed;
+  box-shadow: 0 4px 14px #25324b06;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    translate 180ms ease;
+  animation: panorama-arrive 350ms ease-out backwards;
+  animation-delay: calc(var(--node-order, 0) * 45ms);
+}
+
+.living-panorama .department-node strong {
+  font-size: 12px;
+  padding-right: 6px;
+}
+
+.living-panorama .department-node small {
+  font-size: 10px;
+}
+
+.living-panorama .department-node .node-icon {
+  padding: 6px;
+  margin-top: 1px;
+}
+
+.living-panorama .department-node .node-record {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 400;
+  white-space: nowrap;
+  margin-top: 8px;
+  animation: panorama-record-arrive 1100ms ease-out both;
+}
+
+.living-panorama .department-node .node-open {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  color: #65748e;
+  opacity: 0;
+  translate: -2px 2px;
+  transition:
+    opacity 180ms ease,
+    translate 180ms ease;
+}
+
+.living-panorama .department-node[data-status="support"] {
+  border-color: var(--amber-line);
+  background: #fffdf9;
+}
+
+.living-panorama .department-node[data-status="unknown"] {
+  border-style: dashed;
+  box-shadow: none;
+}
+
+.living-panorama .department-node:hover,
+.living-panorama .department-node:focus-visible {
+  translate: 0 -3px;
+  border-color: #9dabc2;
+  background: #fff;
+  box-shadow: 0 9px 24px #25324b12;
+}
+
+.living-panorama .department-node[data-status="support"]:hover,
+.living-panorama .department-node[data-status="support"]:focus-visible {
+  border-color: var(--amber);
+}
+
+.living-panorama .department-node:hover .node-open,
+.living-panorama .department-node:focus-visible .node-open {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.living-panorama .department-node:active {
+  translate: 0 0;
+  box-shadow: 0 2px 6px #25324b0a;
+}
+
+.living-panorama .orbit-many {
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+.living-panorama .orbit-many .orbit-core {
+  display: none;
+}
+
+.living-panorama .orbit-many .orbit-nodes {
+  width: 100%;
+  gap: 12px;
+}
+
+.living-panorama .orbit-many .department-node {
+  position: relative;
+  inset: auto;
+  transform: none;
+  min-width: 0;
+  max-width: none;
+}
+
+.living-panorama .panorama-caption {
+  line-height: 1.6;
+}
+
+.living-panorama .orbit-moving {
+  /* A definite block size keeps animated cqh lengths stable in a full-width grid. */
+  height: 360px;
+  container-type: size;
+  --orbit-duration: 180s;
+}
+
+.living-panorama .orbit-moving .department-node {
+  left: 50%;
+  top: 50%;
+  /* R(t)·T(a)·R(-2t)·T(b)·R(t) traces an ellipse with no net rotation.
+     a=(rx+ry)/2, b=(rx-ry)/2; only transform changes on each frame. */
+  --orbit-start: translate(-50%, -50%) rotate(var(--orbit-angle))
+    translateX(calc(18cqw + 18.5cqh)) rotate(calc(-2 * var(--orbit-angle)))
+    translateX(calc(18cqw - 18.5cqh)) rotate(var(--orbit-angle));
+  --orbit-end: translate(-50%, -50%) rotate(calc(var(--orbit-angle) + 360deg))
+    translateX(calc(18cqw + 18.5cqh))
+    rotate(calc(-2 * var(--orbit-angle) - 720deg))
+    translateX(calc(18cqw - 18.5cqh)) rotate(calc(var(--orbit-angle) + 360deg));
+  transform: var(--orbit-start);
+  animation: panorama-orbit var(--orbit-duration) linear infinite;
+  will-change: transform;
+}
+
+.living-panorama .panorama-spokes {
+  transform-box: view-box;
+  transform-origin: center;
+  animation: panorama-spokes var(--orbit-duration) linear infinite;
+  will-change: transform;
+}
+
+.living-panorama .orbit-moving:is(:hover, :focus-within) .department-node,
+.living-panorama .orbit-moving:is(:hover, :focus-within) .panorama-spokes,
+.living-panorama[data-motion-paused="true"] .orbit-moving .department-node,
+.living-panorama[data-motion-paused="true"] .panorama-spokes {
+  animation-play-state: paused;
+}
+
+.living-panorama .orbit-motion-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 5px 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 10px;
+}
+
+.living-panorama .orbit-motion-toggle:hover,
+.living-panorama .orbit-motion-toggle:focus-visible {
+  color: var(--ink);
+  border-color: var(--line);
+  background: #fff;
+}
+
+@keyframes panorama-orbit {
+  from {
+    transform: var(--orbit-start);
+  }
+  to {
+    transform: var(--orbit-end);
+  }
+}
+
+@keyframes panorama-spokes {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes panorama-arrive {
+  from {
+    opacity: 0;
+    translate: 0 5px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes panorama-value-arrive {
+  from {
+    color: #7686a1;
+  }
+}
+
+@keyframes panorama-record-arrive {
+  from {
+    background-color: #eef2f9;
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+@container workspace (max-width: 960px) {
+  .living-panorama .orbit-moving {
+    height: auto;
+    container-type: normal;
+  }
+  .living-panorama .orbit-moving .department-node {
+    left: auto;
+    top: auto;
+    transform: none;
+    animation: none;
+    will-change: auto;
+  }
+  .living-panorama .orbit-motion-toggle {
+    display: none;
+  }
+  .panorama.living-panorama {
+    grid-template-columns: 1fr;
+  }
+  .living-panorama .panorama-summary h2 br {
+    display: none;
+  }
+  .living-panorama .panorama-summary > p {
+    max-width: 600px;
+  }
+  .living-panorama .orbit {
+    min-height: 0;
+    padding: 0;
+  }
+  .living-panorama .orbit-core,
+  .living-panorama .orbit-ring,
+  .living-panorama .panorama-connections {
+    display: none;
+  }
+  .living-panorama .orbit-nodes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .living-panorama .department-node {
+    position: relative;
+    inset: auto;
+    transform: none;
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+  }
+  .living-panorama .orbit-empty {
+    position: static;
+    padding: 16px 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .living-panorama .orbit-moving {
+    height: auto;
+    container-type: normal;
+  }
+  .living-panorama .orbit-moving .department-node {
+    left: auto;
+    top: auto;
+    transform: none;
+    animation: none;
+    will-change: auto;
+  }
+  .living-panorama .orbit-motion-toggle {
+    display: none;
+  }
+  .panorama.living-panorama {
+    padding: 22px 18px;
+    gap: 20px;
+  }
+  .living-panorama .orbit {
+    margin-top: 0;
+    padding-top: 18px;
+    min-height: 0;
+    display: block;
+  }
+  .living-panorama .orbit-core,
+  .living-panorama .panorama-connections {
+    display: none;
+  }
+  .living-panorama .orbit-nodes,
+  .living-panorama .orbit-many .orbit-nodes {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+  .living-panorama .department-node {
+    position: relative;
+    inset: auto;
+    transform: none;
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+  }
+  .living-panorama .department-node > span:nth-child(2) {
+    display: block;
+  }
+  .living-panorama .department-node .node-open {
+    opacity: 1;
+    top: 16px;
+    right: 14px;
+    translate: 0 0;
+  }
+  .living-panorama .department-node small {
+    margin-top: 6px;
+  }
+  .living-panorama .panorama-caption {
+    margin-top: 0;
+    font-size: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .living-panorama .orbit-motion-toggle {
+    display: none;
+  }
+  .living-panorama .orbit-moving .department-node,
+  .living-panorama .panorama-spokes {
+    will-change: auto;
+  }
+  .living-panorama *,
+  .living-panorama *::before,
+  .living-panorama *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .living-panorama .department-node:hover,
+  .living-panorama .department-node:focus-visible {
+    translate: none;
+  }
+}
